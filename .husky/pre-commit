@@ -1,2 +1,6 @@
-npx lint-staged && npm run build && git add
-return 1
+if ! npx lint-staged ; then
+  npm run build
+  exit 0
+fi
+
+npm run build

@@ -113,14 +113,14 @@ const entryServer = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineP
 const styles = "/assets/global-styles-C-jAUzXQ.css";
 const links = () => [{ rel: "stylesheet", href: styles }];
 function App() {
-  return /* @__PURE__ */ jsxs("html", { children: [
+  return /* @__PURE__ */ jsxs("html", { lang: "en", children: [
     /* @__PURE__ */ jsxs("head", { children: [
       /* @__PURE__ */ jsx("link", { rel: "icon", href: "data:image/x-icon;base64,AA" }),
       /* @__PURE__ */ jsx(Meta, {}),
       /* @__PURE__ */ jsx(Links, {})
     ] }),
     /* @__PURE__ */ jsxs("body", { children: [
-      /* @__PURE__ */ jsx("h1", { className: styles.heading, children: "Hello world!" }),
+      /* @__PURE__ */ jsx("h1", { className: styles.heading, children: "Welcome to my Knit Notebook" }),
       /* @__PURE__ */ jsx(Outlet, {}),
       /* @__PURE__ */ jsx(Scripts, {})
     ] })
@@ -131,7 +131,7 @@ const route0 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   default: App,
   links
 }, Symbol.toStringTag, { value: "Module" }));
-const serverManifest = { "entry": { "module": "/assets/entry.client-WfTPApbk.js", "imports": ["/assets/components-BEwn8Gzx.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/root-C_baCKB5.js", "imports": ["/assets/components-BEwn8Gzx.js"], "css": [] } }, "url": "/assets/manifest-832d6561.js", "version": "832d6561" };
+const serverManifest = { "entry": { "module": "/assets/entry.client-BBggKA6M.js", "imports": ["/assets/components-BL9nFcS_.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/root-D1okMm3k.js", "imports": ["/assets/components-BL9nFcS_.js"], "css": [] } }, "url": "/assets/manifest-636c994a.js", "version": "636c994a" };
 const mode = "production";
 const assetsBuildDirectory = "build/client";
 const basename = "/";

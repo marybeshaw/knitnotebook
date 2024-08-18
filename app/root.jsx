@@ -6,7 +6,7 @@ export const links = () => [{ rel: "stylesheet", href: styles }];
 
 export default function App() {
   return (
-    <html>
+    <html lang="en">
 
       <head>
         <link rel="icon" href="data:image/x-icon;base64,AA" />
@@ -16,10 +16,6 @@ export default function App() {
       <body>
         <h1 className={styles.heading}>Welcome to my Knit Notebook</h1>
         <Outlet />
-
-
-
-
 
         <Scripts />
       </body>

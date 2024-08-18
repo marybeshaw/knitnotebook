@@ -1,0 +1,51 @@
+{
+  "name": "plain-remix",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "remix vite:build",
+    "clean": "rm -rf node_modules && rm -rf package-lock.json && npm install",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node server.js",
+    "start": "cross-env NODE_ENV=production node ./server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@remix-run/express": "^2.11.2",
+    "@remix-run/node": "^2.11.2",
+    "@remix-run/react": "^2.11.2",
+    "@testing-library/jest-dom": ">=5.16.0",
+    "@testing-library/react": ">=12.0.0",
+    "cross-env": "^7.0.3",
+    "express": "^4.19.2",
+    "isbot": "^4.4.0",
+    "jest": ">=28.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-helmet": "^6.1.0",
+    "remix-auth-oauth2": "^2.3.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.0",
+    "@remix-run/dev": "^2.11.2",
+    "@remix-run/eslint-config": "^2.11.2",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.9.0",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "globals": "^15.9.0",
+    "vite": "^5.4.1"
+  },
+  "engines": {
+    "npm": "10.8.1",
+    "node": "20.16.0"
+  }
+}

@@ -13,8 +13,12 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <h1 className={styles.heading}>Hello world!</h1>
+        <h1 className={styles.heading}>Welcome to my Knit Notebook</h1>
         <Outlet />
+
+
+
+
 
         <Scripts />
       </body>

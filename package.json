@@ -11,7 +11,7 @@
     "lint:fix": "eslint app/ --fix",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "cross-env NODE_ENV=production node ./server.js",
-    "prepare": "node .husky/install.mjs"
+    "prepare": "node .husky/install.js"
   },
   "keywords": [],
   "author": "",

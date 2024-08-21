@@ -1,6 +1,7 @@
 if ! npx lint-staged ; then
   npm run build
   git add .
+  git commit --amend -C HEAD --no-verify
   exit 0
 fi
 

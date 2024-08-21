@@ -1,18 +1,12 @@
-import React from "react";
-import { Links, Meta, Outlet, Scripts } from "@remix-run/react";
-import styles from "./global-styles.css?url";
+import React from "react"
+import { Links, Meta, Outlet, Scripts } from "@remix-run/react"
+import styles from "./global-styles.css?url"
 
-export const links = () => [{ rel: "stylesheet", href: styles }];
-
-
-
-
-
+export const links = () => [{ rel: "stylesheet", href: styles }]
 
 export default function App() {
   return (
     <html lang="en">
-
       <head>
         <link rel="icon" href="data:image/x-icon;base64,AA" />
         <Meta />
@@ -20,10 +14,13 @@ export default function App() {
       </head>
       <body>
         <h1 className={styles.heading}>Welcome to my Knit Notebook</h1>
+        <form action={`/auth/ravelry`} method="post">
+          <button>Sign in with Ravelry</button>
+        </form>
         <Outlet />
 
         <Scripts />
       </body>
     </html>
-  );
+  )
 }

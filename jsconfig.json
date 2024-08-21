@@ -1,0 +1,8 @@
+{  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES6"
+  },
+  "exclude": ["node_modules"],
+"javascript.inlayHints.parameterNames": "all",
+"javascript.referencesCodeLens.enabled" : true,
+}

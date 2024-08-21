@@ -1,4 +1,11 @@
 {
     "eslint.useFlatConfig": true,
-    "eslint.useESLintClass": true
+    "eslint.useESLintClass": true,
+"javascript.inlayHints.parameterNames": "all",
+"javascript.referencesCodeLens.enabled" : true,
+    "editor.codeActionsOnSave": {
+
+    "source.fixAll": "always",
+    "source.organizeImports": "explicit"
+}
 }

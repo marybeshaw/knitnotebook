@@ -1,7 +1,8 @@
 import express from "express"
 
 import { createRequestHandler } from "@remix-run/express"
-import { createProxyMiddleware } from "http-proxy-middleware"
+import { createServer } from "https"
+import { readFileSync } from "fs"
 
 // read port from ENV file, but default to 3000 if none exists
 const port = Number(process.env.PORT || 3000)
@@ -20,24 +21,27 @@ app.use(
   viteDevServer ? viteDevServer.middlewares : express.static("build/client")
 )
 
-app.use(
-  "/api",
-  createProxyMiddleware({
-    target: "http://www.example.org/secret",
-    changeOrigin: true,
-  })
-)
-
 const build = viteDevServer
   ? () => viteDevServer.ssrLoadModule("virtual:remix/server-build")
   : await import("./build/server/index.js")
 
 app.all("*", createRequestHandler({ build }))
 
-app.listen(port, () => {
+if (viteDevServer) {
+  // use self-signed certificates when running locally
+  const httpsOptions = {
+    key: readFileSync(`${process.cwd()}/localhost.key`),
+    cert: readFileSync(`${process.cwd()}/localhost.crt`),
+  }
+  createServer(httpsOptions, app).listen(port, appCallback)
+} else {
+  app.listen(port, appCallback)
+}
+
+function appCallback() {
   console.log(
     `App listening on ${
-      viteDevServer ? `http://localhost:${port}` : `port ${port}`
+      viteDevServer ? `https://localhost:${port}` : `port ${port}`
     }`
   )
-})
+}

@@ -39,7 +39,7 @@ console.log(
 */
 const ravelryStrategy = new OAuth2Strategy(
   {
-    clientID: process.env.RAVELRY_API_CLIENT_ID,
+    clientId: process.env.RAVELRY_API_CLIENT_ID,
     clientSecret: process.env.RAVELRY_API,
     redirectURI: `${domain}/auth/ravelry/callback`,
     scopes: [

@@ -1,1 +1,5 @@
 npm run lint --fix
+
+git add .
+
+git commit --amend -C HEAD --no-verify

@@ -1,5 +1,6 @@
 import axios from "axios"
 import Cookies from "js-cookie"
+// we might not keep this around..
 
 // Adds existing session id to requests
 function authHeaderInterceptor(config) {

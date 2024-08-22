@@ -2,13 +2,12 @@ import { jsx, jsxs } from "react/jsx-runtime";
 import { isbot } from "isbot";
 import { PassThrough } from "node:stream";
 import { renderToPipeableStream } from "react-dom/server";
-import { createReadableStreamFromReadable, createCookieSessionStorage, redirect } from "@remix-run/node";
-import { RemixServer, Meta, Links, Outlet, Scripts, useSearchParams } from "@remix-run/react";
+import { createReadableStreamFromReadable, createCookieSessionStorage } from "@remix-run/node";
+import { RemixServer, Meta, Links, Outlet, Scripts, useLoaderData, json } from "@remix-run/react";
 import "react";
 import { Authenticator } from "remix-auth";
 import { OAuth2Strategy } from "remix-auth-oauth2";
-import Cookies from "js-cookie";
-import { useHydrated } from "remix-utils/use-hydrated";
+import axios from "axios";
 const ABORT_DELAY = 5e3;
 function handleRequest(request, responseStatusCode, responseHeaders, remixContext, loadContext) {
   let prohibitOutOfOrderStreaming = isBotRequest(request.headers.get("user-agent")) || remixContext.isSpaMode;
@@ -136,7 +135,20 @@ const route0 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   default: App,
   links
 }, Symbol.toStringTag, { value: "Module" }));
-let sessionStorage = createCookieSessionStorage({
+const loader$2 = async ({ request }) => {
+  return { loader: true };
+};
+function Callback() {
+  const data = useLoaderData();
+  console.log("we should never get here", data);
+  return /* @__PURE__ */ jsx("p", { children: "Page" });
+}
+const route1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: Callback,
+  loader: loader$2
+}, Symbol.toStringTag, { value: "Module" }));
+const sessionStorage = createCookieSessionStorage({
   cookie: {
     name: "_session",
     // use any name you want here
@@ -152,61 +164,64 @@ let sessionStorage = createCookieSessionStorage({
     // enable this in prod only
   }
 });
-const domain = process.env.NODE_ENV === "development" ? "https://localhost:3000" : "https://knitnotebook.com";
-let authenticator = new Authenticator(sessionStorage);
-console.log(
-  "client id:",
-  process.env.RAVELRY_API_CLIENT_ID,
-  "client secret:",
-  process.env.RAVELRY_API
-);
+const domain = process.env.NODE_ENV === "development" ? `${process.env.USE_LOCAL_HTTPS ? "https" : "http"}://localhost:${Number(
+  process.env.PORT || 3e3
+)}` : "https://knitnotebook.com";
+const redirectURI = `${domain}/auth/ravelry/callback`;
+console.log("official redirect uri that doesn't work:", redirectURI);
+const authenticator = new Authenticator(sessionStorage, {
+  sessionKey: "sessionKey",
+  sessionErrorKey: "sessionErrorKey"
+});
 const ravelryStrategy = new OAuth2Strategy(
   {
     clientId: process.env.RAVELRY_API_CLIENT_ID,
     clientSecret: process.env.RAVELRY_API,
-    redirectURI: `${domain}/auth/ravelry/callback`,
+    redirectURI,
     scopes: [
       "offline"
       // standard OAuth 2.0 scope for requesting refresh tokens
     ],
+    authenticateWith: "http_basic_auth",
+    // Ravelry needs this type of auth.
     authorizationEndpoint: `https://www.ravelry.com/oauth2/auth`,
     tokenEndpoint: `https://www.ravelry.com/oauth2/token`
   },
   async ({ tokens, profile, context, request }) => {
-    console.log("authed!", { tokens, profile, context, request });
-    return profile;
+    const response = await axios.get(
+      "https://api.ravelry.com/current_user.json",
+      {
+        headers: {
+          Authorization: `Bearer ${tokens.access_token}`,
+          Accept: "application/json"
+        }
+      }
+    );
+    return { tokens, profile, user: response.data.user };
   }
 );
-console.log("about to set up strategy middleware");
 authenticator.use(
   ravelryStrategy,
   // each strategy has a name and can be changed to use another one
   // same strategy multiple times, especially useful for the OAuth2 strategy.
   "ravelry"
 );
-console.log("done set up strategy middleware");
-let loader$1 = ({ request, params }) => {
-  return authenticator.authenticate(params.provider, request, {
-    successRedirect: "/login",
+const loader$1 = async ({ request }) => {
+  return authenticator.authenticate("ravelry", request, {
+    successRedirect: "/dashboard",
     failureRedirect: "/login-failed"
   });
 };
-function Callback() {
-  return /* @__PURE__ */ jsx("p", { children: "Callback" });
-}
-const route1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  default: Callback,
-  loader: loader$1
-}, Symbol.toStringTag, { value: "Module" }));
-let loader = () => redirect("/login");
-let action$1 = ({ request }) => {
-  return authenticator.authenticate("ravelry", request);
+const action$1 = ({ request }) => {
+  return authenticator.authenticate("ravelry", request, {
+    successRedirect: "/dashboard",
+    failureRedirect: "/login-failed"
+  });
 };
 const route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$1,
-  loader
+  loader: loader$1
 }, Symbol.toStringTag, { value: "Module" }));
 function LoginFailed() {
   return /* @__PURE__ */ jsx("p", { children: "Login failed." });
@@ -215,21 +230,32 @@ const route3 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   __proto__: null,
   default: LoginFailed
 }, Symbol.toStringTag, { value: "Module" }));
-function SignedIn() {
-  let isHydrated = useHydrated();
-  const [searchParams] = useSearchParams();
-  let authCode = searchParams.get("code");
-  if (authCode) {
-    Cookies.set("ravsessionid", authCode, { expires: 7, path: "/" });
-  }
-  if (isHydrated && authCode) {
-    return /* @__PURE__ */ jsx("p", { children: "You are signed in!" });
-  }
-  return /* @__PURE__ */ jsx("p", { children: "You are not signed in maybe?." });
+const loader = async ({ request }) => {
+  let data = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/"
+  });
+  console.log("data", data);
+  return json(data);
+};
+function Login() {
+  const { user, tokens } = useLoaderData();
+  console.log("user data!!YAY", user);
+  const response = axios.get(
+    `https://api.ravelry.com/people/${user.username}/queue/list.json`,
+    {
+      headers: {
+        Authorization: `Bearer ${tokens.access_token}`,
+        Accept: "application/json"
+      }
+    }
+  );
+  console.log("axios response", response);
+  return /* @__PURE__ */ jsx("p", { children: "Dashboard page." });
 }
 const route4 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  default: SignedIn
+  default: Login,
+  loader
 }, Symbol.toStringTag, { value: "Module" }));
 let action = async ({ request, params }) => {
   await authenticator.logout(request, { redirectTo: "/" });
@@ -238,14 +264,7 @@ const route5 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   __proto__: null,
   action
 }, Symbol.toStringTag, { value: "Module" }));
-function Login() {
-  return /* @__PURE__ */ jsx("p", { children: "Login page." });
-}
-const route6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  default: Login
-}, Symbol.toStringTag, { value: "Module" }));
-const serverManifest = { "entry": { "module": "/assets/entry.client-BpZJSFqG.js", "imports": ["/assets/jsx-runtime-CZxWQka4.js", "/assets/index-Db-zooM1.js", "/assets/components-Cy0PnydR.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/root-XurFiD9J.js", "imports": ["/assets/jsx-runtime-CZxWQka4.js", "/assets/index-Db-zooM1.js", "/assets/components-Cy0PnydR.js"], "css": [] }, "routes/auth.ravelry.callback": { "id": "routes/auth.ravelry.callback", "parentId": "routes/auth.ravelry", "path": "callback", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry.callback-wTR0jr_Q.js", "imports": ["/assets/jsx-runtime-CZxWQka4.js"], "css": [] }, "routes/auth.ravelry": { "id": "routes/auth.ravelry", "parentId": "root", "path": "auth/ravelry", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/login-failed": { "id": "routes/login-failed", "parentId": "root", "path": "login-failed", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/login-failed-Eeb8aWw1.js", "imports": ["/assets/jsx-runtime-CZxWQka4.js"], "css": [] }, "routes/signed-in": { "id": "routes/signed-in", "parentId": "root", "path": "signed-in", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/signed-in-B9DeDtXq.js", "imports": ["/assets/jsx-runtime-CZxWQka4.js", "/assets/index-Db-zooM1.js"], "css": [] }, "routes/logout": { "id": "routes/logout", "parentId": "root", "path": "logout", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/logout-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/login": { "id": "routes/login", "parentId": "root", "path": "login", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/login-Cc7j5lx0.js", "imports": ["/assets/jsx-runtime-CZxWQka4.js"], "css": [] } }, "url": "/assets/manifest-f5b2936e.js", "version": "f5b2936e" };
+const serverManifest = { "entry": { "module": "/assets/entry.client-BC01TrHc.js", "imports": ["/assets/jsx-runtime-CZxWQka4.js", "/assets/components-DpqDqPB9.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/root-Btwxo7xW.js", "imports": ["/assets/jsx-runtime-CZxWQka4.js", "/assets/components-DpqDqPB9.js"], "css": [] }, "routes/auth.ravelry.callback": { "id": "routes/auth.ravelry.callback", "parentId": "routes/auth.ravelry", "path": "callback", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry.callback-D3yLY8NN.js", "imports": ["/assets/jsx-runtime-CZxWQka4.js", "/assets/components-DpqDqPB9.js"], "css": [] }, "routes/auth.ravelry": { "id": "routes/auth.ravelry", "parentId": "root", "path": "auth/ravelry", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/login-failed": { "id": "routes/login-failed", "parentId": "root", "path": "login-failed", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/login-failed-Eeb8aWw1.js", "imports": ["/assets/jsx-runtime-CZxWQka4.js"], "css": [] }, "routes/dashboard": { "id": "routes/dashboard", "parentId": "root", "path": "dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/dashboard-D8T9szs1.js", "imports": ["/assets/jsx-runtime-CZxWQka4.js", "/assets/components-DpqDqPB9.js"], "css": [] }, "routes/logout": { "id": "routes/logout", "parentId": "root", "path": "logout", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/logout-l0sNRNKZ.js", "imports": [], "css": [] } }, "url": "/assets/manifest-e0fa799f.js", "version": "e0fa799f" };
 const mode = "production";
 const assetsBuildDirectory = "build/client";
 const basename = "/";
@@ -286,10 +305,10 @@ const routes = {
     caseSensitive: void 0,
     module: route3
   },
-  "routes/signed-in": {
-    id: "routes/signed-in",
+  "routes/dashboard": {
+    id: "routes/dashboard",
     parentId: "root",
-    path: "signed-in",
+    path: "dashboard",
     index: void 0,
     caseSensitive: void 0,
     module: route4
@@ -301,14 +320,6 @@ const routes = {
     index: void 0,
     caseSensitive: void 0,
     module: route5
-  },
-  "routes/login": {
-    id: "routes/login",
-    parentId: "root",
-    path: "login",
-    index: void 0,
-    caseSensitive: void 0,
-    module: route6
   }
 };
 export {

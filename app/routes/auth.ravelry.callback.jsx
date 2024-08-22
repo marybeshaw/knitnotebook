@@ -1,12 +1,14 @@
-import { authenticator } from "../services/auth.server"
+import { useLoaderData } from "@remix-run/react"
 
-export let loader = ({ request, params }) => {
-  return authenticator.authenticate(params.provider, request, {
-    successRedirect: "/login",
-    failureRedirect: "/login-failed",
-  })
+// after auth.ravelry.callback, remix sends the user back to this page, which doesn't do anything.
+// look in auth.ravelry.jsx
+export const loader = async ({ request }) => {
+  return { loader: true }
 }
 
+// We can't not have this component that never loads?
 export default function Callback() {
-  return <p>Callback</p>
+  const data = useLoaderData()
+  console.log("we should never get here", data)
+  return <p>Page</p>
 }

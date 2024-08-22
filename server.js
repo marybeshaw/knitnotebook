@@ -27,11 +27,11 @@ const build = viteDevServer
 
 app.all("*", createRequestHandler({ build }))
 
-if (viteDevServer) {
-  // use self-signed certificates when running locally
+if (viteDevServer && process.env.USE_LOCAL_HTTPS) {
+  // use self-signed certificates when running locally if it's set up
   const httpsOptions = {
-    key: readFileSync(`${process.cwd()}/localhost.key`),
-    cert: readFileSync(`${process.cwd()}/localhost.crt`),
+    key: readFileSync(`${process.cwd()}/knitnotebook.com+5-key.pem`),
+    cert: readFileSync(`${process.cwd()}/knitnotebook.com+5.pem`),
   }
   createServer(httpsOptions, app).listen(port, appCallback)
 } else {

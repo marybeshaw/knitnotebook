@@ -1,28 +1,22 @@
 import { Authenticator } from "remix-auth"
 import { OAuth2Strategy } from "remix-auth-oauth2"
+import axios from "axios"
 
 import { sessionStorage } from "./session.server"
-import Cookies from "js-cookie"
 
 const domain =
   process.env.NODE_ENV === "development"
-    ? "https://localhost:3000"
+    ? `${process.env.USE_LOCAL_HTTPS ? "https" : "http"}://localhost:${Number(
+      process.env.PORT || 3000
+    )}`
     : "https://knitnotebook.com"
+const redirectURI = `${domain}/auth/ravelry/callback`
+console.log("official redirect uri that doesn't work:", redirectURI)
 
-// Create an instance of the authenticator
-export let authenticator = new Authenticator(sessionStorage)
-
-export function getRavelrySession() {
-  const sessionId = Cookies.get("ravsessionid")
-  console.log("session id in cookie?", sessionId)
-  return sessionId
-}
-console.log(
-  "client id:",
-  process.env.RAVELRY_API_CLIENT_ID,
-  "client secret:",
-  process.env.RAVELRY_API
-)
+export const authenticator = new Authenticator(sessionStorage, {
+  sessionKey: "sessionKey",
+  sessionErrorKey: "sessionErrorKey",
+})
 
 /*
   Authenticating with Ravelry:
@@ -37,25 +31,31 @@ console.log(
   We don't expect to need scopes beyond the basic 'offline', but we can add them later if needed.
   https://www.ravelry.com/api#permissions
 */
-const ravelryStrategy = new OAuth2Strategy(
+export const ravelryStrategy = new OAuth2Strategy(
   {
     clientId: process.env.RAVELRY_API_CLIENT_ID,
     clientSecret: process.env.RAVELRY_API,
-    redirectURI: `${domain}/auth/ravelry/callback`,
+    redirectURI,
     scopes: [
       "offline", // standard OAuth 2.0 scope for requesting refresh tokens
     ],
+    authenticateWith: "http_basic_auth", // Ravelry needs this type of auth.
     authorizationEndpoint: `https://www.ravelry.com/oauth2/auth`,
     tokenEndpoint: `https://www.ravelry.com/oauth2/token`,
   },
   async ({ tokens, profile, context, request }) => {
-    // here you can use the params above to get the user and return it
-    // what you do inside this and how you find the user is up to you
-    console.log("authed!", { tokens, profile, context, request })
-    return profile
+    const response = await axios.get(
+      "https://api.ravelry.com/current_user.json",
+      {
+        headers: {
+          Authorization: `Bearer ${tokens.access_token}`,
+          Accept: "application/json",
+        },
+      }
+    )
+    return { tokens, profile, user: response.data.user }
   }
 )
-console.log("about to set up strategy middleware")
 
 authenticator.use(
   ravelryStrategy,
@@ -63,5 +63,3 @@ authenticator.use(
   // same strategy multiple times, especially useful for the OAuth2 strategy.
   "ravelry"
 )
-
-console.log("done set up strategy middleware")

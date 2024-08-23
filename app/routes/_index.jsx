@@ -20,7 +20,7 @@ export default function Index() {
         Knit Notebook
       </Typography>
       <Typography variant="body1">
-        To use the knit notebook, you'll want a Ravelry account.
+        To use the knit notebook, you&rsquo;ll want a Ravelry account.
       </Typography>
       <Link to="/auth/ravelry" color="secondary" component={RemixLink}>
         Sign in with Ravelry

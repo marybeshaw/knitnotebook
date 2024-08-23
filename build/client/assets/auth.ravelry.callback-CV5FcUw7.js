@@ -1,0 +1,1 @@
+import{j as o}from"./jsx-runtime-BJa62n0-.js";import{u as a}from"./components-BfamxL2E.js";function s(){const e=a();return console.log("we should never get here",e),o.jsx("p",{children:"Page"})}export{s as default};

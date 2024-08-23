@@ -26,7 +26,7 @@ export default function Login() {
         Authorization: `Bearer ${tokens.access_token}`,
         Accept: "application/json",
       },
-    }
+    },
   )
   console.log("axios response", response)
   return <p>Dashboard page.</p>

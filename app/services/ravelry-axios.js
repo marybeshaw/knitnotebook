@@ -15,7 +15,7 @@ function authHeaderInterceptor(config) {
 
 // send along auth and other useful info on axios requests
 axios.interceptors.request.use(authHeaderInterceptor, (err) =>
-  Promise.reject(err)
+  Promise.reject(err),
 )
 
 // shenanigans to add interceptors to the axios.create function, which doesn't use normal interceptors
@@ -24,7 +24,7 @@ const origCreate = axios.create
 function createInstanceWithHeaderInterceptors(config) {
   const instance = origCreate(config)
   instance.interceptors.request(authHeaderInterceptor, (err) =>
-    Promise.reject(err)
+    Promise.reject(err),
   )
 }
 

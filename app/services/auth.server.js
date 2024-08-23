@@ -7,11 +7,12 @@ import { sessionStorage } from "./session.server"
 const domain =
   process.env.NODE_ENV === "development"
     ? `${process.env.USE_LOCAL_HTTPS ? "https" : "http"}://localhost:${Number(
-      process.env.PORT || 3000
+      process.env.PORT || 3000,
     )}`
     : "https://knitnotebook.com"
+
+
 const redirectURI = `${domain}/auth/ravelry/callback`
-console.log("official redirect uri that doesn't work:", redirectURI)
 
 export const authenticator = new Authenticator(sessionStorage, {
   sessionKey: "sessionKey",
@@ -51,15 +52,16 @@ export const ravelryStrategy = new OAuth2Strategy(
           Authorization: `Bearer ${tokens.access_token}`,
           Accept: "application/json",
         },
-      }
+      },
     )
     return { tokens, profile, user: response.data.user }
-  }
+  },
 )
+
 
 authenticator.use(
   ravelryStrategy,
   // each strategy has a name and can be changed to use another one
   // same strategy multiple times, especially useful for the OAuth2 strategy.
-  "ravelry"
+  "ravelry",
 )

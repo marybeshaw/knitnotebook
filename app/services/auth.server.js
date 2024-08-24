@@ -44,16 +44,17 @@ export const ravelryStrategy = new OAuth2Strategy(
     tokenEndpoint: `https://www.ravelry.com/oauth2/token`,
   },
   async ({ tokens, profile, context, request }) => {
-    const response = await axios.get(
+    const axiosInstance = axios.create()
+
+    axiosInstance.defaults.headers.common["Authorization"] =
+      `Bearer ${tokens.access_token}`
+
+    // add user profile information to session data
+    const response = await axiosInstance.get(
       "https://api.ravelry.com/current_user.json",
-      {
-        headers: {
-          Authorization: `Bearer ${tokens.access_token}`,
-          Accept: "application/json",
-        },
-      },
     )
-    console.log("current_user response data", response.data)
+
+    // console.log("current_user response data", response.data)
     return { tokens, profile, user: response.data.user }
   },
 )

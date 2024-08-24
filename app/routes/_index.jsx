@@ -20,8 +20,7 @@ export default function Index() {
         Knit Notebook
       </Typography>
       <Typography variant="body1">
-        Welcome to my knit notebook, a project to help me manage my Ravelry
-        account.
+        Welcome to the knit notebook, a demo project for UtahJS in September.
       </Typography>
       <Typography variant="body1">
         To use the knit notebook, you&rsquo;ll want a Ravelry account.

@@ -4,9 +4,9 @@ import { RemixBrowser } from "@remix-run/react"
 import { CacheProvider } from "@emotion/react"
 import { ThemeProvider } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
-import ClientStyleContext from "./src/ClientStyleContext"
-import createEmotionCache from "./src/createEmotionCache"
-import theme from "./src/theme"
+import ClientStyleContext from "./src/styles/client.context"
+import createEmotionCache from "./src/styles/createEmotionCache"
+import theme from "./src/styles/theme"
 
 interface ClientCacheProviderProps {
   children: React.ReactNode
@@ -14,17 +14,12 @@ interface ClientCacheProviderProps {
 function ClientCacheProvider({ children }: ClientCacheProviderProps) {
   const [cache, setCache] = React.useState(createEmotionCache())
 
-  const clientStyleContextValue = React.useMemo(
-    () => ({
-      reset() {
-        setCache(createEmotionCache())
-      },
-    }),
-    [],
-  )
+  const reset = React.useCallback(() => {
+    setCache(createEmotionCache())
+  }, [])
 
   return (
-    <ClientStyleContext.Provider value={clientStyleContextValue}>
+    <ClientStyleContext.Provider value={{ reset }}>
       <CacheProvider value={cache}>{children}</CacheProvider>
     </ClientStyleContext.Provider>
   )

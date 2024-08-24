@@ -1,4 +1,4 @@
-import { useCallback } from "react"
+import { Fragment, useCallback } from "react"
 
 import { Button, Typography } from "@mui/material"
 import { Form, useSubmit } from "@remix-run/react"
@@ -7,7 +7,6 @@ import { authenticator } from "../services/auth.server"
 import { useUser } from "../src/UserProvider"
 
 export let action = async ({ request, params }) => {
-  console.log("handling logout on the server")
   await authenticator.logout(request, { redirectTo: "/" })
 }
 
@@ -17,7 +16,6 @@ export default function Logout() {
 
   const handleSubmit = useCallback(
     (e) => {
-      console.log("submitting log out")
       setLoggedOut(true)
       submit(
         { logout: "yes" },
@@ -33,17 +31,17 @@ export default function Logout() {
   )
 
   return (
-    <>
+    <Fragment>
       <Typography variant="h1" component="h1">
-        Logout
+        Sign Out
       </Typography>
       {user?.username && (
         <Form onSubmit={handleSubmit}>
           <Typography variant="body2" component="p">
-            Are you sure you want to log out?
+            Are you sure you want to sign out?
           </Typography>
           <Button value="logout" type="submit">
-            Yes, Log Out
+            Yes, Sign Out
           </Button>
         </Form>
       )}
@@ -52,6 +50,6 @@ export default function Logout() {
           You have now logged out of Ravelry.
         </Typography>
       )}
-    </>
+    </Fragment>
   )
 }

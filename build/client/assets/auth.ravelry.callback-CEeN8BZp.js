@@ -1,1 +1,0 @@
-import{j as o}from"./jsx-runtime-COeSZJCi.js";import{u as r}from"./components-CdNMkR6R.js";import"./index-CJLi3wgZ.js";function n(){const e=r();return console.log("we should never get here",e),o.jsx("p",{children:"Page"})}export{n as default};

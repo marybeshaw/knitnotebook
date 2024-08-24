@@ -1,0 +1,9 @@
+{
+    "import": [
+        "@cspell/dict-html-symbol-entities/cspell-ext.json"
+    ],
+    "words": [
+        "haspopup",
+        "linebreak"
+    ]
+}

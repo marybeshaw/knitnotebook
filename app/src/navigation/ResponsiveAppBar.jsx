@@ -7,7 +7,6 @@ import {
   Box,
   Button,
   Container,
-  Icon,
   IconButton,
   Menu,
   MenuItem,
@@ -19,30 +18,30 @@ import { Menu as MenuIcon, Notebook } from "mdi-material-ui"
 
 import { useUser } from "../UserProvider"
 
-const loggedInPages = [
+const loggedInRoutes = [
   { name: "Projects", path: "/projects" },
   { name: "Queue", path: "/queue" },
   { name: "Stash", path: "/stash" },
   { name: "Favorites", path: "/favorites" },
   { name: "About", path: "/about" },
 ]
-const loggedOutPages = [
+const loggedOutRoutes = [
   { name: "Sign in with Ravelry", path: "/auth/ravelry" },
   { name: "About", path: "/about" },
 ]
 const settings = [
   { name: "Profile", path: "/profile" },
   { name: "Dashboard", path: "/dashboard" },
-  { name: "Log Out", path: "/logout" },
+  { name: "Sign Out", path: "/sign-out" },
 ]
 
 function ResponsiveAppBar() {
-  const { user: maybeUser } = useUser() // maybeUser is undefined if not signed in
+  const { user: userLoggedIn } = useUser() // userLoggedIn is undefined if not signed in
 
   const [anchorElNav, setAnchorElNav] = React.useState(null)
   const [anchorElUser, setAnchorElUser] = React.useState(null)
 
-  const pages = maybeUser ? loggedInPages : loggedOutPages
+  const routes = userLoggedIn ? loggedInRoutes : loggedOutRoutes
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget)
@@ -81,7 +80,7 @@ function ResponsiveAppBar() {
             <IconButton
               size="large"
               aria-label="account of current user"
-              aria-controls="menu-appbar"
+              aria-controls="menu-app-bar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
               color="inherit"
@@ -89,7 +88,7 @@ function ResponsiveAppBar() {
               <MenuIcon />
             </IconButton>
             <Menu
-              id="menu-appbar"
+              id="menu-app-bar"
               anchorEl={anchorElNav}
               anchorOrigin={{
                 vertical: "bottom",
@@ -106,20 +105,19 @@ function ResponsiveAppBar() {
                 display: { xs: "block", md: "none" },
               }}
             >
-              {pages.map((page) => (
-                <MenuItem key={page.name} onClick={handleCloseNavMenu}>
-                  <Link
-                    variant="menuLink"
-                    to={page.path}
-                    sx={{
-                      display: {
-                        textDecoration: "none",
-                      },
-                    }}
-                  >
-                    {page.name}
-                  </Link>
-                </MenuItem>
+              {routes.map((page) => (
+                // Putting the link outside the menu item lets the use click
+                // anywhere in the menu item (not just the text) to visit the link
+                <Link
+                  key={page.name}
+                  variant="menuLink"
+                  to={page.path}
+                  sx={{
+                    textDecoration: "none",
+                  }}
+                >
+                  <MenuItem onClick={handleCloseNavMenu}>{page.name}</MenuItem>
+                </Link>
               ))}
             </Menu>
           </Box>
@@ -138,7 +136,7 @@ function ResponsiveAppBar() {
             Knit Notebook
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {pages.map((page) => (
+            {routes.map((page) => (
               <Box key={page.name} mr={1} ml={1}>
                 <Link
                   to={page.path}
@@ -155,19 +153,19 @@ function ResponsiveAppBar() {
             ))}
           </Box>
 
-          {maybeUser && (
+          {userLoggedIn && (
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                   <Avatar
-                    alt={maybeUser?.username}
-                    src={maybeUser?.small_photo_url}
+                    alt={userLoggedIn?.username}
+                    src={userLoggedIn?.small_photo_url}
                   />
                 </IconButton>
               </Tooltip>
               <Menu
                 sx={{ mt: "45px" }}
-                id="menu-appbar"
+                id="menu-app-bar"
                 anchorEl={anchorElUser}
                 anchorOrigin={{
                   vertical: "top",
@@ -182,17 +180,20 @@ function ResponsiveAppBar() {
                 onClose={handleCloseUserMenu}
               >
                 {settings.map((setting) => (
-                  <MenuItem key={setting.name} onClick={handleCloseUserMenu}>
-                    <Link
-                      to={setting.path}
-                      variant="menuLink"
-                      sx={{
-                        textDecoration: "none",
-                      }}
-                    >
+                  // Putting the link outside the menu item means you can click
+                  // anywhere in the menu item (not just the text) to visit the link
+                  <Link
+                    key={setting.name}
+                    to={setting.path}
+                    variant="menuLink"
+                    sx={{
+                      textDecoration: "none",
+                    }}
+                  >
+                    <MenuItem onClick={handleCloseUserMenu}>
                       {setting.name}
-                    </Link>
-                  </MenuItem>
+                    </MenuItem>
+                  </Link>
                 ))}
               </Menu>
             </Box>

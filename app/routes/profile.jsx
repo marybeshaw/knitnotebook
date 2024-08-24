@@ -1,3 +1,4 @@
+import { Fragment } from "react"
 import { useLoaderData, json } from "@remix-run/react"
 import { authenticator } from "../services/auth.server"
 
@@ -14,9 +15,9 @@ export const loader = async ({ request }) => {
 export default function Profile() {
   // let isHydrated = useHydrated() // don't conditionally render anything with cookie data unless hydrated (i.e., definitely on the client)
   const { user } = useLoaderData()
-  console.log("rendering profile", user)
+  // console.log("rendering profile", user)
   return (
-    <>
+    <Fragment>
       <Typography variant="h1" component="h1">
         My Profile
       </Typography>
@@ -28,6 +29,6 @@ export default function Profile() {
       <Typography variant="body1" component="p">
         Right now, Knit Notebook only displays user data from Ravelry.
       </Typography>
-    </>
+    </Fragment>
   )
 }

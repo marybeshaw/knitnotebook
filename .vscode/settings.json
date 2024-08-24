@@ -7,5 +7,22 @@
     "editor.codeActionsOnSave": {
         "source.fixAll": "always",
         "source.organizeImports": "explicit"
-    }
+    },
+    "errorLens.enabled": true,
+    "auto-close-tag.SublimeText3Mode": true,
+    "auto-close-tag.activationOnLanguage": [
+        "html",
+        "jsx",
+        "ejs",
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact",
+        "plaintext",
+        "markdown",
+    ],
+ 
+    "editor.linkedEditing": true,
+    "cSpell.words": ["ravelry", "rsquo"]
+  
 }

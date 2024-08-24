@@ -3,7 +3,7 @@ import { forwardRef } from "react"
 import { Link as MLink } from "@mui/material"
 import { useHref, useLinkClickHandler } from "react-router-dom"
 
-const Link = forwardRef(
+export const Link = forwardRef(
   ({ onClick, replace = false, state, target, to, ...rest }, ref) => {
     let href = useHref(to)
     let handleClick = useLinkClickHandler(to, {

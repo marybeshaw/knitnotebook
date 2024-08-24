@@ -18,8 +18,9 @@ import {
   unstable_useEnhancedEffect as useEnhancedEffect,
 } from "@mui/material"
 
-import theme from "./src/theme"
-import ClientStyleContext from "./src/ClientStyleContext"
+import theme from "./src/styles/theme"
+import ClientStyleContext from "./src/styles/client.context"
+import ServerStyleContext from "./src/styles/server.context"
 import Layout from "./src/Layout"
 
 import UserProvider from "./src/UserProvider"
@@ -37,6 +38,7 @@ export const loader = async ({ request }) => {
 
 const Document = withEmotionCache(({ children, title }, emotionCache) => {
   const clientStyleData = React.useContext(ClientStyleContext)
+  const serverStyleData = React.useContext(ServerStyleContext)
 
   // Only executed on client
   useEnhancedEffect(() => {
@@ -60,14 +62,19 @@ const Document = withEmotionCache(({ children, title }, emotionCache) => {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta name="theme-color" content={theme.palette.primary.main} />
+
+        {/* <link rel="icon" type="image/x-icon" href="/images/favicon.ico" /> */}
         {title ? <title>{title}</title> : null}
         <Meta />
         <Links />
         <link rel="stylesheet" href="https://use.typekit.net/ojf8ene.css" />
-        <meta
-          name="emotion-insertion-point"
-          content="emotion-insertion-point"
-        />
+        {serverStyleData?.map(({ key, ids, css }) => (
+          <style
+            key={key}
+            data-emotion={`${key} ${ids.join(" ")}`}
+            dangerouslySetInnerHTML={{ __html: css }}
+          />
+        ))}
       </head>
       <body>
         {children}

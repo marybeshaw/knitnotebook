@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback } from "react"
 
 import { Button, Typography } from "@mui/material"
 import { Form, useSubmit } from "@remix-run/react"
@@ -29,7 +29,7 @@ export default function Logout() {
         },
       )
     },
-    [submit],
+    [submit, setLoggedOut],
   )
 
   return (

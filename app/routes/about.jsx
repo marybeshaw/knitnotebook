@@ -10,8 +10,8 @@ export default function About() {
         About the Knit Notebook
       </Typography>
       <Typography variant="body2" component="p">
-        Mary Shaw started this to demo "complex state in React" for UtahJS on
-        September 13, 2024.
+        Mary Shaw started this to demo &rquot;complex state in React&lquot; for
+        UtahJS on September 13, 2024.
       </Typography>
       <Link variant="primaryLink" to="/">
         Go to the main page

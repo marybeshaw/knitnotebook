@@ -1,7 +1,6 @@
 import React, { Fragment } from "react"
 import Link from "../src/components/Link"
-import { Link as MLink , Typography } from "@mui/material"
-
+import { Link as MLink, Typography } from "@mui/material"
 
 export default function About() {
   return (
@@ -10,8 +9,8 @@ export default function About() {
         About the Knit Notebook
       </Typography>
       <Typography variant="body2" component="p">
-        Mary Shaw started this to demo &rquot;complex state in React&lquot; for
-        UtahJS on September 13, 2024.
+        Mary Shaw started this to demo: Complex state in React for UtahJS on
+        September 13, 2024.
       </Typography>
 
       <Typography variant="body2" component="p">

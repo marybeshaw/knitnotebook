@@ -1,6 +1,6 @@
 import * as React from "react"
-import { Link as RemixLink } from "@remix-run/react"
-import { Link, Typography } from "@mui/material"
+import Link from "../src/components/Link"
+import { Typography } from "@mui/material"
 
 // https://remix.run/docs/en/main/route/meta
 export const meta = () => [
@@ -16,17 +16,18 @@ export const meta = () => [
 export default function Index() {
   return (
     <React.Fragment>
-      <Typography variant="h1" component="h1" sx={{ mb: 2 }}>
+      <Typography variant="h1" component="h1">
         Knit Notebook
+      </Typography>
+      <Typography variant="body1">
+        Welcome to my knit notebook, a project to help me manage my Ravelry
+        account.
       </Typography>
       <Typography variant="body1">
         To use the knit notebook, you&rsquo;ll want a Ravelry account.
       </Typography>
-      <Link to="/auth/ravelry" color="secondary" component={RemixLink}>
+      <Link to="/auth/ravelry" variant="contained">
         Sign in with Ravelry
-      </Link>{" "}
-      <Link to="/about" color="secondary" component={RemixLink}>
-        Go to the about page
       </Link>
     </React.Fragment>
   )

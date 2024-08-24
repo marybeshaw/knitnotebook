@@ -13,11 +13,11 @@ export const loader = async ({ request }) => {
   return json(data)
 }
 
-export default function Login() {
+export default function Dashboard() {
   // let isHydrated = useHydrated() // don't conditionally render anything with cookie data unless hydrated (i.e., definitely on the client)
 
   const { user, tokens } = useLoaderData()
-  console.log("user data!!YAY", user)
+  console.log("rendering dashboard", user)
 
   const response = axios.get(
     `https://api.ravelry.com/people/${user.username}/queue/list.json`,

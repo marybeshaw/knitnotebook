@@ -5,16 +5,35 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  json,
   isRouteErrorResponse,
+  useLoaderData,
   useRouteError,
 } from "@remix-run/react"
 
 // Material UI & Emotion
 import { withEmotionCache } from "@emotion/react"
-import { unstable_useEnhancedEffect as useEnhancedEffect } from "@mui/material"
+import {
+  Box,
+  unstable_useEnhancedEffect as useEnhancedEffect,
+} from "@mui/material"
+
 import theme from "./src/theme"
 import ClientStyleContext from "./src/ClientStyleContext"
 import Layout from "./src/Layout"
+
+import UserProvider from "./src/UserProvider"
+import { authenticator } from "./services/auth.server"
+
+export const loader = async ({ request }) => {
+  let data = {}
+  try {
+    data = await authenticator.isAuthenticated(request)
+  } catch (e) {
+    console.log("error loading root data", e)
+  }
+  return json(data)
+}
 
 const Document = withEmotionCache(({ children, title }, emotionCache) => {
   const clientStyleData = React.useContext(ClientStyleContext)
@@ -62,12 +81,20 @@ const Document = withEmotionCache(({ children, title }, emotionCache) => {
 // https://remix.run/docs/en/main/route/component
 // https://remix.run/docs/en/main/file-conventions/routes
 export default function App() {
+  const loaderData = useLoaderData()
+
   return (
-    <Document>
-      <Layout>
-        <Outlet />
-      </Layout>
-    </Document>
+    <UserProvider user={loaderData?.user}>
+      <Document>
+        <Box
+          sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+        >
+          <Layout>
+            <Outlet />
+          </Layout>
+        </Box>
+      </Document>
+    </UserProvider>
   )
 }
 

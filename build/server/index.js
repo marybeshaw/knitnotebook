@@ -1,12 +1,14 @@
-import { jsx, jsxs } from "react/jsx-runtime";
+import { jsx, jsxs, Fragment } from "react/jsx-runtime";
 import * as ReactDOMServer from "react-dom/server";
-import { RemixServer, Meta, Links, ScrollRestoration, Scripts, Outlet, useRouteError, isRouteErrorResponse, useLoaderData, json, Link as Link$1 } from "@remix-run/react";
+import { RemixServer, Meta, Links, ScrollRestoration, Scripts, useLoaderData, Outlet, json, useRouteError, isRouteErrorResponse, useSubmit, Form } from "@remix-run/react";
 import createCache from "@emotion/cache";
-import { createTheme, colors, ThemeProvider, CssBaseline, Typography, Link, SvgIcon, Container, Box, unstable_useEnhancedEffect, Button } from "@mui/material";
+import { createTheme, ThemeProvider, CssBaseline, Link as Link$1, AppBar, Container, Toolbar, Typography, Box, IconButton, Menu as Menu$1, MenuItem, Tooltip, Avatar, unstable_useEnhancedEffect, Button } from "@mui/material";
 import { CacheProvider, withEmotionCache } from "@emotion/react";
 import createEmotionServer from "@emotion/server/create-instance";
 import * as React from "react";
-import React__default from "react";
+import React__default, { forwardRef, createContext, useState, useContext, useCallback } from "react";
+import { useHref, useLinkClickHandler } from "react-router-dom";
+import { Notebook, Menu } from "mdi-material-ui";
 import { Authenticator } from "remix-auth";
 import { OAuth2Strategy } from "remix-auth-oauth2";
 import axios from "axios";
@@ -14,20 +16,11 @@ import { createCookieSessionStorage } from "@remix-run/node";
 function createEmotionCache() {
   return createCache({ key: "css" });
 }
-const skippySharp = ["Skippy Sharp", "sans-serif"].join(",");
+const skippySharp = ["skippy-sharp", "sans-serif"].join(",");
 const capitolina = ["capitolina", "serif"].join(",");
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#556cd6"
-    },
-    secondary: {
-      main: "#19857b"
-    },
-    error: {
-      main: colors.red.A400
-    }
-  },
+let theme = createTheme({
+  // Theme customization goes here as usual, including tonalOffset and/or
+  // contrastThreshold as the augmentColor() function relies on these
   typography: {
     fontFamily: skippySharp,
     htmlFontSize: 16,
@@ -38,6 +31,14 @@ const theme = createTheme({
     fontWeightBold: 700,
     allVariants: {
       fontFamily: capitolina
+    },
+    navTitle: {
+      fontFamily: capitolina,
+      fontWeight: 700,
+      fontSize: 22,
+      textTransform: "none",
+      textDecoration: "none",
+      flexGrow: 1
     },
     h1: {
       fontFamily: capitolina,
@@ -59,29 +60,109 @@ const theme = createTheme({
       fontWeight: 600,
       fontSize: 22
     },
+    h5: {
+      fontFamily: capitolina,
+      fontWeight: 600,
+      fontSize: 20
+    },
     body1: {
-      fontFamily: skippySharp,
+      fontFamily: capitolina,
       fontWeight: 400,
-      fontSize: 16
+      fontSize: 18
     },
     body2: {
-      fontFamily: skippySharp,
+      fontFamily: capitolina,
       fontWeight: 400,
-      fontSize: 14
+      fontSize: 16
     },
     button: {
       fontFamily: skippySharp,
       fontWeight: 400,
-      fontSize: 16,
+      fontSize: 20,
       textTransform: "none"
+    },
+    primaryLink: {
+      fontFamily: capitolina,
+      fontWeight: 600,
+      fontSize: 22,
+      textTransform: "none",
+      textDecoration: "none"
+    },
+    menuLink: {
+      fontFamily: capitolina,
+      fontWeight: 600,
+      fontSize: 22,
+      textTransform: "none",
+      textDecoration: "none"
+    },
+    subtitle1: {
+      fontFamily: capitolina,
+      fontWeight: 600,
+      fontSize: 20
+    },
+    subtitle2: {
+      fontFamily: capitolina,
+      fontWeight: 600,
+      fontSize: 20
+    },
+    caption: {
+      fontFamily: capitolina,
+      fontWeight: 600,
+      fontSize: 20
+    },
+    overline: {
+      fontFamily: capitolina,
+      fontWeight: 600,
+      fontSize: 20,
+      textTransform: "uppercase"
     }
   }
 });
+theme = createTheme(theme, {
+  palette: {
+    default: theme.palette.augmentColor({
+      color: {
+        main: "#077cdd"
+      }
+    }),
+    primary: theme.palette.augmentColor({
+      color: {
+        main: "#077cdd"
+      }
+    }),
+    secondary: theme.palette.augmentColor({
+      color: {
+        main: "#a112b3"
+      }
+    }),
+    error: theme.palette.augmentColor({
+      color: {
+        main: "#d10f45"
+      }
+    }),
+    warning: theme.palette.augmentColor({
+      color: {
+        main: "#995c00"
+      }
+    }),
+    info: theme.palette.augmentColor({
+      color: {
+        main: "#039eb1"
+      }
+    }),
+    success: theme.palette.augmentColor({
+      color: {
+        main: "#5120b4"
+      }
+    })
+  }
+});
+const theme$1 = theme;
 function handleRequest(request, responseStatusCode, responseHeaders, remixContext) {
   const cache = createEmotionCache();
   const { extractCriticalToChunks } = createEmotionServer(cache);
   function MuiRemixServer() {
-    return /* @__PURE__ */ jsx(CacheProvider, { value: cache, children: /* @__PURE__ */ jsxs(ThemeProvider, { theme, children: [
+    return /* @__PURE__ */ jsx(CacheProvider, { value: cache, children: /* @__PURE__ */ jsxs(ThemeProvider, { theme: theme$1, children: [
       /* @__PURE__ */ jsx(CssBaseline, {}),
       /* @__PURE__ */ jsx(RemixServer, { context: remixContext, url: request.url })
     ] }) });
@@ -112,123 +193,245 @@ const ClientStyleContext = React.createContext({
   reset: () => {
   }
 });
-function LightBulbIcon(props) {
-  return /* @__PURE__ */ jsx(SvgIcon, { ...props, children: /* @__PURE__ */ jsx("path", { d: "M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z" }) });
+const Link = forwardRef(
+  ({ onClick, replace = false, state, target, to, ...rest }, ref) => {
+    let href = useHref(to);
+    let handleClick = useLinkClickHandler(to, {
+      replace,
+      state,
+      target
+    });
+    return /* @__PURE__ */ jsx(
+      Link$1,
+      {
+        ...rest,
+        href,
+        onClick: (event) => {
+          onClick == null ? void 0 : onClick(event);
+          if (!event.defaultPrevented) {
+            handleClick(event);
+          }
+        },
+        ref,
+        target
+      }
+    );
+  }
+);
+const UserContext = createContext({});
+function UserProvider({ user, children }) {
+  const [loggedOut, setLoggedOut] = useState();
+  return /* @__PURE__ */ jsx(
+    UserContext.Provider,
+    {
+      value: { user: loggedOut ? void 0 : user, setLoggedOut },
+      children
+    }
+  );
 }
-function ProTip() {
-  return /* @__PURE__ */ jsxs(Typography, { sx: { mt: 6, mb: 3, color: "text.secondary" }, children: [
-    /* @__PURE__ */ jsx(LightBulbIcon, { sx: { mr: 1, verticalAlign: "middle" } }),
-    "Pro tip: See more ",
-    /* @__PURE__ */ jsx(Link, { href: "https://mui.com/material-ui/getting-started/templates/", children: "templates" }),
-    " in the Material UI documentation."
-  ] });
+function useUser() {
+  const { user, setLoggedOut } = useContext(UserContext);
+  return { user, setLoggedOut };
+}
+const loggedInPages = [
+  { name: "Projects", path: "/projects" },
+  { name: "Queue", path: "/queue" },
+  { name: "Stash", path: "/stash" },
+  { name: "Favorites", path: "/favorites" },
+  { name: "About", path: "/about" }
+];
+const loggedOutPages = [
+  { name: "Sign in with Ravelry", path: "/auth/ravelry" },
+  { name: "About", path: "/about" }
+];
+const settings = [
+  { name: "Profile", path: "/profile" },
+  { name: "Dashboard", path: "/dashboard" },
+  { name: "Log Out", path: "/logout" }
+];
+function ResponsiveAppBar() {
+  const { user: maybeUser } = useUser();
+  const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const pages = maybeUser ? loggedInPages : loggedOutPages;
+  const handleOpenNavMenu = (event) => {
+    setAnchorElNav(event.currentTarget);
+  };
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
+  const handleCloseNavMenu = () => {
+    setAnchorElNav(null);
+  };
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+  return /* @__PURE__ */ jsx(AppBar, { color: "primary", position: "static", children: /* @__PURE__ */ jsx(Container, { maxWidth: "xl", children: /* @__PURE__ */ jsxs(Toolbar, { disableGutters: true, children: [
+    /* @__PURE__ */ jsx(Notebook, { sx: { display: { xs: "none", md: "flex" }, mr: 1 } }),
+    /* @__PURE__ */ jsx(
+      Typography,
+      {
+        variant: "navTitle",
+        noWrap: true,
+        component: "a",
+        href: "/",
+        sx: {
+          mr: 3,
+          display: { xs: "none", md: "flex" },
+          color: "inherit"
+        },
+        children: "Knit Notebook"
+      }
+    ),
+    /* @__PURE__ */ jsxs(Box, { sx: { flexGrow: 1, display: { xs: "flex", md: "none" } }, children: [
+      /* @__PURE__ */ jsx(
+        IconButton,
+        {
+          size: "large",
+          "aria-label": "account of current user",
+          "aria-controls": "menu-appbar",
+          "aria-haspopup": "true",
+          onClick: handleOpenNavMenu,
+          color: "inherit",
+          children: /* @__PURE__ */ jsx(Menu, {})
+        }
+      ),
+      /* @__PURE__ */ jsx(
+        Menu$1,
+        {
+          id: "menu-appbar",
+          anchorEl: anchorElNav,
+          anchorOrigin: {
+            vertical: "bottom",
+            horizontal: "left"
+          },
+          keepMounted: true,
+          transformOrigin: {
+            vertical: "top",
+            horizontal: "left"
+          },
+          open: Boolean(anchorElNav),
+          onClose: handleCloseNavMenu,
+          sx: {
+            display: { xs: "block", md: "none" }
+          },
+          children: pages.map((page) => /* @__PURE__ */ jsx(MenuItem, { onClick: handleCloseNavMenu, children: /* @__PURE__ */ jsx(
+            Link,
+            {
+              variant: "menuLink",
+              to: page.path,
+              sx: {
+                display: {
+                  textDecoration: "none"
+                }
+              },
+              children: page.name
+            }
+          ) }, page.name))
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsx(Notebook, { sx: { display: { xs: "flex", md: "none" }, mr: 1 } }),
+    /* @__PURE__ */ jsx(
+      Typography,
+      {
+        variant: "navTitle",
+        noWrap: true,
+        component: "a",
+        href: "/",
+        sx: {
+          mr: 3,
+          display: { xs: "flex", md: "none" },
+          color: "inherit"
+        },
+        children: "Knit Notebook"
+      }
+    ),
+    /* @__PURE__ */ jsx(Box, { sx: { flexGrow: 1, display: { xs: "none", md: "flex" } }, children: pages.map((page) => /* @__PURE__ */ jsx(Box, { mr: 1, ml: 1, children: /* @__PURE__ */ jsx(
+      Link,
+      {
+        to: page.path,
+        onClick: handleCloseNavMenu,
+        color: "inherit",
+        variant: "menuLink",
+        sx: {
+          textDecoration: "none"
+        },
+        children: page.name
+      }
+    ) }, page.name)) }),
+    maybeUser && /* @__PURE__ */ jsxs(Box, { sx: { flexGrow: 0 }, children: [
+      /* @__PURE__ */ jsx(Tooltip, { title: "Open settings", children: /* @__PURE__ */ jsx(IconButton, { onClick: handleOpenUserMenu, sx: { p: 0 }, children: /* @__PURE__ */ jsx(
+        Avatar,
+        {
+          alt: maybeUser == null ? void 0 : maybeUser.username,
+          src: maybeUser == null ? void 0 : maybeUser.small_photo_url
+        }
+      ) }) }),
+      /* @__PURE__ */ jsx(
+        Menu$1,
+        {
+          sx: { mt: "45px" },
+          id: "menu-appbar",
+          anchorEl: anchorElUser,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right"
+          },
+          keepMounted: true,
+          transformOrigin: {
+            vertical: "top",
+            horizontal: "right"
+          },
+          open: Boolean(anchorElUser),
+          onClose: handleCloseUserMenu,
+          children: settings.map((setting) => /* @__PURE__ */ jsx(MenuItem, { onClick: handleCloseUserMenu, children: /* @__PURE__ */ jsx(
+            Link,
+            {
+              to: setting.path,
+              variant: "menuLink",
+              sx: {
+                textDecoration: "none"
+              },
+              children: setting.name
+            }
+          ) }, setting.name))
+        }
+      )
+    ] })
+  ] }) }) });
 }
 function Copyright() {
   return /* @__PURE__ */ jsxs(Typography, { variant: "body2", color: "text.secondary", align: "center", children: [
     "Copyright © ",
-    /* @__PURE__ */ jsx(Link, { color: "inherit", href: "https://mui.com/", children: "Knit Notebook" }),
+    /* @__PURE__ */ jsx(Link$1, { color: "inherit", href: "https://www.knitnotebook.com/", children: "Knit Notebook" }),
     " ",
     (/* @__PURE__ */ new Date()).getFullYear(),
     "."
   ] });
 }
 function Layout({ children }) {
-  return /* @__PURE__ */ jsx(Container, { maxWidth: "sm", children: /* @__PURE__ */ jsxs(Box, { sx: { my: 4 }, children: [
-    children,
-    /* @__PURE__ */ jsx(ProTip, {}),
-    /* @__PURE__ */ jsx(Copyright, {})
-  ] }) });
-}
-const Document = withEmotionCache(({ children, title }, emotionCache) => {
-  const clientStyleData = React__default.useContext(ClientStyleContext);
-  unstable_useEnhancedEffect(() => {
-    emotionCache.sheet.container = document.head;
-    const tags = emotionCache.sheet.tags;
-    emotionCache.sheet.flush();
-    tags.forEach((tag) => {
-      emotionCache.sheet._insertTag(tag);
-    });
-    clientStyleData.reset();
-  }, []);
-  return /* @__PURE__ */ jsxs("html", { lang: "en", children: [
-    /* @__PURE__ */ jsxs("head", { children: [
-      /* @__PURE__ */ jsx("meta", { charSet: "utf-8" }),
-      /* @__PURE__ */ jsx("meta", { name: "viewport", content: "width=device-width,initial-scale=1" }),
-      /* @__PURE__ */ jsx("meta", { name: "theme-color", content: theme.palette.primary.main }),
-      title ? /* @__PURE__ */ jsx("title", { children: title }) : null,
-      /* @__PURE__ */ jsx(Meta, {}),
-      /* @__PURE__ */ jsx(Links, {}),
-      /* @__PURE__ */ jsx("link", { rel: "stylesheet", href: "https://use.typekit.net/ojf8ene.css" }),
-      /* @__PURE__ */ jsx(
-        "meta",
-        {
-          name: "emotion-insertion-point",
-          content: "emotion-insertion-point"
-        }
-      )
-    ] }),
-    /* @__PURE__ */ jsxs("body", { children: [
-      children,
-      /* @__PURE__ */ jsx(ScrollRestoration, {}),
-      /* @__PURE__ */ jsx(Scripts, {})
-    ] })
-  ] });
-});
-function App() {
-  return /* @__PURE__ */ jsx(Document, { children: /* @__PURE__ */ jsx(Layout, { children: /* @__PURE__ */ jsx(Outlet, {}) }) });
-}
-function ErrorBoundary() {
-  const error = useRouteError();
-  if (isRouteErrorResponse(error)) {
-    let message;
-    switch (error.status) {
-      case 401:
-        message = /* @__PURE__ */ jsx("p", { children: "Oops! Looks like you tried to visit a page that you do not have access to." });
-        break;
-      case 404:
-        message = /* @__PURE__ */ jsx("p", { children: "Oops! Looks like you tried to visit a page that does not exist." });
-        break;
-      default:
-        throw new Error(error.data || error.statusText);
+  return /* @__PURE__ */ jsxs(
+    Container,
+    {
+      maxWidth: "xl",
+      sx: {
+        margin: 0,
+        display: "grid",
+        gridTemplateRows: "auto 1fr auto",
+        minHeight: "100vh"
+      },
+      children: [
+        /* @__PURE__ */ jsx(ResponsiveAppBar, {}),
+        /* @__PURE__ */ jsx(Box, { sx: { my: 4 }, children }),
+        /* @__PURE__ */ jsx(Footer, {})
+      ]
     }
-    return /* @__PURE__ */ jsx(Document, { title: `${error.status} ${error.statusText}`, children: /* @__PURE__ */ jsxs(Layout, { children: [
-      /* @__PURE__ */ jsxs("h1", { children: [
-        error.status,
-        ": ",
-        error.statusText
-      ] }),
-      message
-    ] }) });
-  }
-  if (error instanceof Error) {
-    console.error(error);
-    return /* @__PURE__ */ jsx(Document, { title: "Error!", children: /* @__PURE__ */ jsx(Layout, { children: /* @__PURE__ */ jsxs("div", { children: [
-      /* @__PURE__ */ jsx("h1", { children: "There was an error" }),
-      /* @__PURE__ */ jsx("p", { children: error.message }),
-      /* @__PURE__ */ jsx("hr", {}),
-      /* @__PURE__ */ jsx("p", { children: "Hey, developer, you should replace this with what you want your users to see." })
-    ] }) }) });
-  }
-  return /* @__PURE__ */ jsx("h1", { children: "Unknown Error" });
+  );
 }
-const route0 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  ErrorBoundary,
-  default: App
-}, Symbol.toStringTag, { value: "Module" }));
-const loader$2 = async ({ request }) => {
-  return { loader: true };
-};
-function Callback() {
-  const data = useLoaderData();
-  console.log("we should never get here", data);
-  return /* @__PURE__ */ jsx("p", { children: "Page" });
+function Footer() {
+  return /* @__PURE__ */ jsx(Box, { sx: { display: "block", minHeight: "50px" }, children: /* @__PURE__ */ jsx(Copyright, {}) });
 }
-const route1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  default: Callback,
-  loader: loader$2
-}, Symbol.toStringTag, { value: "Module" }));
 const sessionStorage = createCookieSessionStorage({
   cookie: {
     name: "_session",
@@ -277,6 +480,7 @@ const ravelryStrategy = new OAuth2Strategy(
         }
       }
     );
+    console.log("current_user response data", response.data);
     return { tokens, profile, user: response.data.user };
   }
 );
@@ -286,7 +490,114 @@ authenticator.use(
   // same strategy multiple times, especially useful for the OAuth2 strategy.
   "ravelry"
 );
-const loader$1 = async ({ request }) => {
+const loader$4 = async ({ request }) => {
+  let data = {};
+  try {
+    data = await authenticator.isAuthenticated(request);
+  } catch (e) {
+    console.log("error loading root data", e);
+  }
+  return json(data);
+};
+const Document = withEmotionCache(({ children, title }, emotionCache) => {
+  const clientStyleData = React__default.useContext(ClientStyleContext);
+  unstable_useEnhancedEffect(() => {
+    emotionCache.sheet.container = document.head;
+    const tags = emotionCache.sheet.tags;
+    emotionCache.sheet.flush();
+    tags.forEach((tag) => {
+      emotionCache.sheet._insertTag(tag);
+    });
+    clientStyleData.reset();
+  }, []);
+  return /* @__PURE__ */ jsxs("html", { lang: "en", children: [
+    /* @__PURE__ */ jsxs("head", { children: [
+      /* @__PURE__ */ jsx("meta", { charSet: "utf-8" }),
+      /* @__PURE__ */ jsx("meta", { name: "viewport", content: "width=device-width,initial-scale=1" }),
+      /* @__PURE__ */ jsx("meta", { name: "theme-color", content: theme$1.palette.primary.main }),
+      title ? /* @__PURE__ */ jsx("title", { children: title }) : null,
+      /* @__PURE__ */ jsx(Meta, {}),
+      /* @__PURE__ */ jsx(Links, {}),
+      /* @__PURE__ */ jsx("link", { rel: "stylesheet", href: "https://use.typekit.net/ojf8ene.css" }),
+      /* @__PURE__ */ jsx(
+        "meta",
+        {
+          name: "emotion-insertion-point",
+          content: "emotion-insertion-point"
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxs("body", { children: [
+      children,
+      /* @__PURE__ */ jsx(ScrollRestoration, {}),
+      /* @__PURE__ */ jsx(Scripts, {})
+    ] })
+  ] });
+});
+function App() {
+  const loaderData = useLoaderData();
+  return /* @__PURE__ */ jsx(UserProvider, { user: loaderData == null ? void 0 : loaderData.user, children: /* @__PURE__ */ jsx(Document, { children: /* @__PURE__ */ jsx(
+    Box,
+    {
+      sx: { minHeight: "100vh", display: "flex", flexDirection: "column" },
+      children: /* @__PURE__ */ jsx(Layout, { children: /* @__PURE__ */ jsx(Outlet, {}) })
+    }
+  ) }) });
+}
+function ErrorBoundary() {
+  const error = useRouteError();
+  if (isRouteErrorResponse(error)) {
+    let message;
+    switch (error.status) {
+      case 401:
+        message = /* @__PURE__ */ jsx("p", { children: "Oops! Looks like you tried to visit a page that you do not have access to." });
+        break;
+      case 404:
+        message = /* @__PURE__ */ jsx("p", { children: "Oops! Looks like you tried to visit a page that does not exist." });
+        break;
+      default:
+        throw new Error(error.data || error.statusText);
+    }
+    return /* @__PURE__ */ jsx(Document, { title: `${error.status} ${error.statusText}`, children: /* @__PURE__ */ jsxs(Layout, { children: [
+      /* @__PURE__ */ jsxs("h1", { children: [
+        error.status,
+        ": ",
+        error.statusText
+      ] }),
+      message
+    ] }) });
+  }
+  if (error instanceof Error) {
+    console.error(error);
+    return /* @__PURE__ */ jsx(Document, { title: "Error!", children: /* @__PURE__ */ jsx(Layout, { children: /* @__PURE__ */ jsxs("div", { children: [
+      /* @__PURE__ */ jsx("h1", { children: "There was an error" }),
+      /* @__PURE__ */ jsx("p", { children: error.message }),
+      /* @__PURE__ */ jsx("hr", {}),
+      /* @__PURE__ */ jsx("p", { children: "Hey, developer, you should replace this with what you want your users to see." })
+    ] }) }) });
+  }
+  return /* @__PURE__ */ jsx("h1", { children: "Unknown Error" });
+}
+const route0 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  ErrorBoundary,
+  default: App,
+  loader: loader$4
+}, Symbol.toStringTag, { value: "Module" }));
+const loader$3 = async ({ request }) => {
+  return { loader: true };
+};
+function Callback() {
+  const data = useLoaderData();
+  console.log("we should never get here", data);
+  return /* @__PURE__ */ jsx("p", { children: "Page" });
+}
+const route1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: Callback,
+  loader: loader$3
+}, Symbol.toStringTag, { value: "Module" }));
+const loader$2 = async ({ request }) => {
   return authenticator.authenticate("ravelry", request, {
     successRedirect: "/dashboard",
     failureRedirect: "/login-failed"
@@ -301,7 +612,7 @@ const action$1 = ({ request }) => {
 const route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$1,
-  loader: loader$1
+  loader: loader$2
 }, Symbol.toStringTag, { value: "Module" }));
 function LoginFailed() {
   return /* @__PURE__ */ jsx("p", { children: "Login failed." });
@@ -310,16 +621,16 @@ const route3 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   __proto__: null,
   default: LoginFailed
 }, Symbol.toStringTag, { value: "Module" }));
-const loader = async ({ request }) => {
+const loader$1 = async ({ request }) => {
   let data = await authenticator.isAuthenticated(request, {
     failureRedirect: "/"
   });
   console.log("data", data);
   return json(data);
 };
-function Login() {
+function Dashboard() {
   const { user, tokens } = useLoaderData();
-  console.log("user data!!YAY", user);
+  console.log("rendering dashboard", user);
   const response = axios.get(
     `https://api.ravelry.com/people/${user.username}/queue/list.json`,
     {
@@ -334,7 +645,28 @@ function Login() {
 }
 const route4 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  default: Login,
+  default: Dashboard,
+  loader: loader$1
+}, Symbol.toStringTag, { value: "Module" }));
+const loader = async ({ request }) => {
+  let data = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/"
+  });
+  return json(data);
+};
+function Profile() {
+  const { user } = useLoaderData();
+  console.log("rendering profile", user);
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsx(Typography, { variant: "h1", component: "h1", children: "My Profile" }),
+    /* @__PURE__ */ jsx(Typography, { variant: "h2", component: "h2", children: user.username }),
+    /* @__PURE__ */ jsx("img", { src: user.large_photo_url, alt: "" }),
+    /* @__PURE__ */ jsx(Typography, { variant: "body1", component: "p", children: "Right now, Knit Notebook only displays user data from Ravelry." })
+  ] });
+}
+const route5 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: Profile,
   loader
 }, Symbol.toStringTag, { value: "Module" }));
 const meta = () => [
@@ -346,36 +678,66 @@ const meta = () => [
 ];
 function Index() {
   return /* @__PURE__ */ jsxs(React.Fragment, { children: [
-    /* @__PURE__ */ jsx(Typography, { variant: "h1", component: "h1", sx: { mb: 2 }, children: "Knit Notebook" }),
+    /* @__PURE__ */ jsx(Typography, { variant: "h1", component: "h1", children: "Knit Notebook" }),
+    /* @__PURE__ */ jsx(Typography, { variant: "body1", children: "Welcome to my knit notebook, a project to help me manage my Ravelry account." }),
     /* @__PURE__ */ jsx(Typography, { variant: "body1", children: "To use the knit notebook, you’ll want a Ravelry account." }),
-    /* @__PURE__ */ jsx(Link, { to: "/auth/ravelry", color: "secondary", component: Link$1, children: "Sign in with Ravelry" }),
-    " ",
-    /* @__PURE__ */ jsx(Link, { to: "/about", color: "secondary", component: Link$1, children: "Go to the about page" })
+    /* @__PURE__ */ jsx(Link, { to: "/auth/ravelry", variant: "contained", children: "Sign in with Ravelry" })
   ] });
 }
-const route5 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const route6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Index,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
 let action = async ({ request, params }) => {
+  console.log("handling logout on the server");
   await authenticator.logout(request, { redirectTo: "/" });
 };
-const route6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  action
-}, Symbol.toStringTag, { value: "Module" }));
-function About() {
-  return /* @__PURE__ */ jsxs(React.Fragment, { children: [
-    /* @__PURE__ */ jsx(Typography, { variant: "h4", component: "h1", sx: { mb: 2 }, children: "Knit Notebook by Mary Shaw" }),
-    /* @__PURE__ */ jsx(Button, { variant: "contained", component: Link$1, to: "/", children: "Go to the main page" })
+function Logout() {
+  const { user, setLoggedOut } = useUser();
+  const submit = useSubmit();
+  const handleSubmit = useCallback(
+    (e) => {
+      console.log("submitting log out");
+      setLoggedOut(true);
+      submit(
+        { logout: "yes" },
+        {
+          method: "post",
+          encType: "application/json",
+          navigate: false,
+          replace: true
+        }
+      );
+    },
+    [submit]
+  );
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsx(Typography, { variant: "h1", component: "h1", children: "Logout" }),
+    (user == null ? void 0 : user.username) && /* @__PURE__ */ jsxs(Form, { onSubmit: handleSubmit, children: [
+      /* @__PURE__ */ jsx(Typography, { variant: "body2", component: "p", children: "Are you sure you want to log out?" }),
+      /* @__PURE__ */ jsx(Button, { value: "logout", type: "submit", children: "Yes, Log Out" })
+    ] }),
+    !(user == null ? void 0 : user.username) && /* @__PURE__ */ jsx(Typography, { variant: "body1", component: "p", children: "You have now logged out of Ravelry." })
   ] });
 }
 const route7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
+  action,
+  default: Logout
+}, Symbol.toStringTag, { value: "Module" }));
+function About() {
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsx(Typography, { variant: "h1", component: "h1", children: "About the Knit Notebook" }),
+    /* @__PURE__ */ jsx(Typography, { variant: "body2", component: "p", children: 'Mary Shaw started this to demo "complex state in React" for UtahJS on September 13, 2024.' }),
+    /* @__PURE__ */ jsx(Link, { variant: "primaryLink", to: "/", children: "Go to the main page" })
+  ] });
+}
+const route8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
   default: About
 }, Symbol.toStringTag, { value: "Module" }));
-const serverManifest = { "entry": { "module": "/assets/entry.client-Ccr5h3ZC.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-BHmgdzK_.js", "/assets/components-BfamxL2E.js", "/assets/theme-D_c9Gy6E.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-DZsJWF8A.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-BHmgdzK_.js", "/assets/components-BfamxL2E.js", "/assets/theme-D_c9Gy6E.js", "/assets/Typography-D3Ecso4y.js", "/assets/Link-GXY_UejE.js", "/assets/useEnhancedEffect-CtgP67NC.js"], "css": [] }, "routes/auth.ravelry.callback": { "id": "routes/auth.ravelry.callback", "parentId": "routes/auth.ravelry", "path": "callback", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry.callback-CV5FcUw7.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/components-BfamxL2E.js"], "css": [] }, "routes/auth.ravelry": { "id": "routes/auth.ravelry", "parentId": "root", "path": "auth/ravelry", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/login-failed": { "id": "routes/login-failed", "parentId": "root", "path": "login-failed", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/login-failed-TM3j_Pv9.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js"], "css": [] }, "routes/dashboard": { "id": "routes/dashboard", "parentId": "root", "path": "dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/dashboard-DbZQrJb6.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/components-BfamxL2E.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-Oy8Dh1ew.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-BHmgdzK_.js", "/assets/Typography-D3Ecso4y.js", "/assets/Link-GXY_UejE.js", "/assets/components-BfamxL2E.js"], "css": [] }, "routes/logout": { "id": "routes/logout", "parentId": "root", "path": "logout", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/logout-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-wWR4MMMt.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-BHmgdzK_.js", "/assets/Typography-D3Ecso4y.js", "/assets/useEnhancedEffect-CtgP67NC.js", "/assets/components-BfamxL2E.js"], "css": [] } }, "url": "/assets/manifest-27341e59.js", "version": "27341e59" };
+const serverManifest = { "entry": { "module": "/assets/entry.client-D8To4bgw.js", "imports": ["/assets/jsx-runtime-COeSZJCi.js", "/assets/DefaultPropsProvider-D51iAxbH.js", "/assets/index-CJLi3wgZ.js", "/assets/theme-D_TBr3Kt.js", "/assets/components-CdNMkR6R.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-Hb6ne7MB.js", "imports": ["/assets/jsx-runtime-COeSZJCi.js", "/assets/DefaultPropsProvider-D51iAxbH.js", "/assets/index-CJLi3wgZ.js", "/assets/theme-D_TBr3Kt.js", "/assets/components-CdNMkR6R.js", "/assets/Typography-Ba9FbqKo.js", "/assets/useIsFocusVisible-7K5PZs8K.js", "/assets/Link-CSOfzlTI.js", "/assets/UserProvider-D6X8cN53.js"], "css": [] }, "routes/auth.ravelry.callback": { "id": "routes/auth.ravelry.callback", "parentId": "routes/auth.ravelry", "path": "callback", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry.callback-CEeN8BZp.js", "imports": ["/assets/jsx-runtime-COeSZJCi.js", "/assets/index-CJLi3wgZ.js", "/assets/components-CdNMkR6R.js"], "css": [] }, "routes/auth.ravelry": { "id": "routes/auth.ravelry", "parentId": "root", "path": "auth/ravelry", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/login-failed": { "id": "routes/login-failed", "parentId": "root", "path": "login-failed", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/login-failed-CBTR9n4s.js", "imports": ["/assets/jsx-runtime-COeSZJCi.js"], "css": [] }, "routes/dashboard": { "id": "routes/dashboard", "parentId": "root", "path": "dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/dashboard-CsqiYSj0.js", "imports": ["/assets/jsx-runtime-COeSZJCi.js", "/assets/index-CJLi3wgZ.js", "/assets/components-CdNMkR6R.js"], "css": [] }, "routes/profile": { "id": "routes/profile", "parentId": "root", "path": "profile", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/profile-CrNmkx3f.js", "imports": ["/assets/jsx-runtime-COeSZJCi.js", "/assets/index-CJLi3wgZ.js", "/assets/DefaultPropsProvider-D51iAxbH.js", "/assets/components-CdNMkR6R.js", "/assets/Typography-Ba9FbqKo.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-DOTBTzAm.js", "imports": ["/assets/jsx-runtime-COeSZJCi.js", "/assets/DefaultPropsProvider-D51iAxbH.js", "/assets/index-CJLi3wgZ.js", "/assets/Typography-Ba9FbqKo.js", "/assets/useIsFocusVisible-7K5PZs8K.js", "/assets/Link-CSOfzlTI.js"], "css": [] }, "routes/logout": { "id": "routes/logout", "parentId": "root", "path": "logout", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/logout-BL0Vux9r.js", "imports": ["/assets/jsx-runtime-COeSZJCi.js", "/assets/DefaultPropsProvider-D51iAxbH.js", "/assets/Typography-Ba9FbqKo.js", "/assets/useIsFocusVisible-7K5PZs8K.js", "/assets/index-CJLi3wgZ.js", "/assets/UserProvider-D6X8cN53.js", "/assets/components-CdNMkR6R.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-CPCvj35M.js", "imports": ["/assets/jsx-runtime-COeSZJCi.js", "/assets/DefaultPropsProvider-D51iAxbH.js", "/assets/index-CJLi3wgZ.js", "/assets/Typography-Ba9FbqKo.js", "/assets/useIsFocusVisible-7K5PZs8K.js", "/assets/Link-CSOfzlTI.js"], "css": [] } }, "url": "/assets/manifest-292d6797.js", "version": "292d6797" };
 const mode = "production";
 const assetsBuildDirectory = "build/client";
 const basename = "/";
@@ -424,13 +786,21 @@ const routes = {
     caseSensitive: void 0,
     module: route4
   },
+  "routes/profile": {
+    id: "routes/profile",
+    parentId: "root",
+    path: "profile",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route5
+  },
   "routes/_index": {
     id: "routes/_index",
     parentId: "root",
     path: void 0,
     index: true,
     caseSensitive: void 0,
-    module: route5
+    module: route6
   },
   "routes/logout": {
     id: "routes/logout",
@@ -438,7 +808,7 @@ const routes = {
     path: "logout",
     index: void 0,
     caseSensitive: void 0,
-    module: route6
+    module: route7
   },
   "routes/about": {
     id: "routes/about",
@@ -446,7 +816,7 @@ const routes = {
     path: "about",
     index: void 0,
     caseSensitive: void 0,
-    module: route7
+    module: route8
   }
 };
 export {

@@ -11,7 +11,6 @@ const domain =
     )}`
     : "https://knitnotebook.com"
 
-
 const redirectURI = `${domain}/auth/ravelry/callback`
 
 export const authenticator = new Authenticator(sessionStorage, {
@@ -54,10 +53,10 @@ export const ravelryStrategy = new OAuth2Strategy(
         },
       },
     )
+    console.log("current_user response data", response.data)
     return { tokens, profile, user: response.data.user }
   },
 )
-
 
 authenticator.use(
   ravelryStrategy,

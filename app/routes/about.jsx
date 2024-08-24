@@ -1,16 +1,21 @@
-import * as React from "react"
-import { Link } from "@remix-run/react"
-import { Typography, Button } from "@mui/material"
+import React from "react"
+import Link from "../src/components/Link"
+
+import { Typography } from "@mui/material"
 
 export default function About() {
   return (
-    <React.Fragment>
-      <Typography variant="h4" component="h1" sx={{ mb: 2 }}>
-        Knit Notebook by Mary Shaw
+    <>
+      <Typography variant="h1" component="h1">
+        About the Knit Notebook
       </Typography>
-      <Button variant="contained" component={Link} to="/">
+      <Typography variant="body2" component="p">
+        Mary Shaw started this to demo "complex state in React" for UtahJS on
+        September 13, 2024.
+      </Typography>
+      <Link variant="primaryLink" to="/">
         Go to the main page
-      </Button>
-    </React.Fragment>
+      </Link>
+    </>
   )
 }

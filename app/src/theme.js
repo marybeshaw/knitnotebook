@@ -1,21 +1,11 @@
-import { createTheme, colors } from "@mui/material"
+import { createTheme } from "@mui/material"
 
-const skippySharp = ["Skippy Sharp", "sans-serif"].join(",")
+const skippySharp = ["skippy-sharp", "sans-serif"].join(",")
 const capitolina = ["capitolina", "serif"].join(",")
 
-// Create a theme instance.
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#556cd6",
-    },
-    secondary: {
-      main: "#19857b",
-    },
-    error: {
-      main: colors.red.A400,
-    },
-  },
+let theme = createTheme({
+  // Theme customization goes here as usual, including tonalOffset and/or
+  // contrastThreshold as the augmentColor() function relies on these
   typography: {
     fontFamily: skippySharp,
     htmlFontSize: 16,
@@ -26,6 +16,14 @@ const theme = createTheme({
     fontWeightBold: 700,
     allVariants: {
       fontFamily: capitolina,
+    },
+    navTitle: {
+      fontFamily: capitolina,
+      fontWeight: 700,
+      fontSize: 22,
+      textTransform: "none",
+      textDecoration: "none",
+      flexGrow: 1,
     },
     h1: {
       fontFamily: capitolina,
@@ -47,22 +45,103 @@ const theme = createTheme({
       fontWeight: 600,
       fontSize: 22,
     },
+    h5: {
+      fontFamily: capitolina,
+      fontWeight: 600,
+      fontSize: 20,
+    },
     body1: {
-      fontFamily: skippySharp,
+      fontFamily: capitolina,
       fontWeight: 400,
-      fontSize: 16,
+      fontSize: 18,
     },
     body2: {
-      fontFamily: skippySharp,
+      fontFamily: capitolina,
       fontWeight: 400,
-      fontSize: 14,
+      fontSize: 16,
     },
     button: {
       fontFamily: skippySharp,
       fontWeight: 400,
-      fontSize: 16,
+      fontSize: 20,
       textTransform: "none",
     },
+    primaryLink: {
+      fontFamily: capitolina,
+      fontWeight: 600,
+      fontSize: 22,
+      textTransform: "none",
+      textDecoration: "none",
+    },
+    menuLink: {
+      fontFamily: capitolina,
+      fontWeight: 600,
+      fontSize: 22,
+      textTransform: "none",
+      textDecoration: "none",
+    },
+    subtitle1: {
+      fontFamily: capitolina,
+      fontWeight: 600,
+      fontSize: 20,
+    },
+    subtitle2: {
+      fontFamily: capitolina,
+      fontWeight: 600,
+      fontSize: 20,
+    },
+    caption: {
+      fontFamily: capitolina,
+      fontWeight: 600,
+      fontSize: 20,
+    },
+    overline: {
+      fontFamily: capitolina,
+      fontWeight: 600,
+      fontSize: 20,
+      textTransform: "uppercase",
+    },
+  },
+})
+
+// Create a theme instance.
+theme = createTheme(theme, {
+  palette: {
+    default: theme.palette.augmentColor({
+      color: {
+        main: "#077cdd",
+      },
+    }),
+    primary: theme.palette.augmentColor({
+      color: {
+        main: "#077cdd",
+      },
+    }),
+    secondary: theme.palette.augmentColor({
+      color: {
+        main: "#a112b3",
+      },
+    }),
+    error: theme.palette.augmentColor({
+      color: {
+        main: "#d10f45",
+      },
+    }),
+    warning: theme.palette.augmentColor({
+      color: {
+        main: "#995c00",
+      },
+    }),
+    info: theme.palette.augmentColor({
+      color: {
+        main: "#039eb1",
+      },
+    }),
+    success: theme.palette.augmentColor({
+      color: {
+        main: "#5120b4",
+      },
+    }),
   },
 })
 

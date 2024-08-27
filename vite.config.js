@@ -4,7 +4,7 @@ import { defineConfig } from "vite"
 import { readFileSync } from "fs"
 
 export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
-  if (command === "serve") {
+  if (command === "serve" && process.env) {
     return {
       server: {
         https: {

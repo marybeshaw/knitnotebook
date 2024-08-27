@@ -1,22 +1,24 @@
-import { jsx, jsxs } from "react/jsx-runtime";
+import { jsx, jsxs, Fragment as Fragment$1 } from "react/jsx-runtime";
 import * as ReactDOMServer from "react-dom/server";
-import { RemixServer, Meta, Links, ScrollRestoration, Scripts, useLoaderData, Outlet, json, useRouteError, isRouteErrorResponse, useSubmit, Form, useFetcher } from "@remix-run/react";
-import { createTheme, ThemeProvider, CssBaseline, Link as Link$1, AppBar, Container, Toolbar, Typography, Box, IconButton, Menu as Menu$1, MenuItem, Tooltip, Avatar, unstable_useEnhancedEffect, Button } from "@mui/material";
+import { RemixServer, Meta, Links, ScrollRestoration, Scripts, useLoaderData, Outlet, json, useRouteError, isRouteErrorResponse, useSubmit, Form, useFetcher, useSearchParams } from "@remix-run/react";
+import { createTheme, ThemeProvider, CssBaseline, Link as Link$1, AppBar, Container, Toolbar, Typography, Box, IconButton, Menu as Menu$1, MenuItem, Tooltip, Avatar, unstable_useEnhancedEffect, ToggleButtonGroup, ToggleButton, Button, FormControl, InputLabel, Select, Pagination, Grid, Paper, Unstable_Grid2 } from "@mui/material";
 import { CacheProvider, withEmotionCache } from "@emotion/react";
 import createEmotionServer from "@emotion/server/create-instance";
 import * as React from "react";
 import React__default, { createContext, forwardRef, useState, useContext, Fragment, useCallback, useMemo } from "react";
 import createCache from "@emotion/cache";
 import { useHref, useLinkClickHandler } from "react-router-dom";
-import { Notebook, Menu, Drag } from "mdi-material-ui";
+import { Notebook, Menu } from "mdi-material-ui";
 import { Authenticator } from "remix-auth";
 import { OAuth2Strategy } from "remix-auth-oauth2";
 import axios from "axios";
 import { createCookieSessionStorage } from "@remix-run/node";
+import { FavoriteBorder, Workspaces, BrandingWatermark, Store, Psychology, Forum, Backpack, Gesture, BorderColor, ImportContacts, ViewList, GridView, ImportExport } from "@mui/icons-material";
 import { useSensors, useSensor, PointerSensor, KeyboardSensor, DndContext, closestCenter, DragOverlay } from "@dnd-kit/core";
 import { useSortable, sortableKeyboardCoordinates, SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { css } from "@emotion/css";
 import { CSS } from "@dnd-kit/utilities";
+import { useHydrated } from "remix-utils/use-hydrated";
 const ClientStyleContext = createContext({
   reset: () => {
   }
@@ -416,7 +418,7 @@ function Copyright() {
       (/* @__PURE__ */ new Date()).getFullYear(),
       "."
     ] }),
-    /* @__PURE__ */ jsx(Typography, { variant: "body2", color: "text.secondary", align: "center", children: "This application is not affiliated with Ravelry in any way, and is not endorsed or associated with Ravelry." })
+    /* @__PURE__ */ jsx(Typography, { variant: "body2", color: "text.secondary", align: "center", children: "This application is not affiliated with Ravelry in any way, and is not endorsed by or associated with Ravelry." })
   ] });
 }
 function Layout({ children }) {
@@ -494,7 +496,7 @@ authenticator.use(
   // same strategy multiple times, especially useful for the OAuth2 strategy.
   "ravelry"
 );
-const loader$5 = async ({ request }) => {
+const loader$7 = async ({ request }) => {
   let data = {};
   try {
     data = await authenticator.isAuthenticated(request);
@@ -588,9 +590,9 @@ const route0 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   __proto__: null,
   ErrorBoundary,
   default: App,
-  loader: loader$5
+  loader: loader$7
 }, Symbol.toStringTag, { value: "Module" }));
-const loader$4 = async ({ request }) => {
+const loader$6 = async ({ request }) => {
   return { loader: true };
 };
 function Callback() {
@@ -601,9 +603,9 @@ function Callback() {
 const route1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Callback,
-  loader: loader$4
+  loader: loader$6
 }, Symbol.toStringTag, { value: "Module" }));
-const loader$3 = async ({ request }) => {
+const loader$5 = async ({ request }) => {
   return authenticator.authenticate("ravelry", request, {
     successRedirect: "/dashboard",
     failureRedirect: "/login-failed"
@@ -618,7 +620,7 @@ const action$2 = ({ request }) => {
 const route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$2,
-  loader: loader$3
+  loader: loader$5
 }, Symbol.toStringTag, { value: "Module" }));
 function LoginFailed() {
   return /* @__PURE__ */ jsx("p", { children: "Login failed." });
@@ -627,15 +629,13 @@ const route3 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProper
   __proto__: null,
   default: LoginFailed
 }, Symbol.toStringTag, { value: "Module" }));
-const loader$2 = async ({ request }) => {
+const loader$4 = async ({ request }) => {
   let data = await authenticator.isAuthenticated(request, {
     failureRedirect: "/"
   });
   return json(data);
 };
 function Dashboard() {
-  const { user } = useLoaderData();
-  console.log("rendering dashboard", user);
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx(Typography, { variant: "h1", component: "h1", children: "Knit Notebook Dashboard" }),
     /* @__PURE__ */ jsx(Typography, { variant: "body2", component: "p", children: "Welcome to your Knit Notebook, where you can update your Ravelry notebook with a different UI." }),
@@ -650,7 +650,132 @@ function Dashboard() {
 const route4 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Dashboard,
-  loader: loader$2
+  loader: loader$4
+}, Symbol.toStringTag, { value: "Module" }));
+async function getFavorites({ username, accessToken }) {
+  const axiosInstance = axios.create();
+  axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+  const response = await axiosInstance.get(
+    `https://api.ravelry.com/people/${username}/favorites/list.json`
+  );
+  console.log("favorites response", response.data.favorites.length);
+  return response.data.favorites;
+}
+const DisplayPrefsContext = createContext({});
+function DisplayPrefsProvider({ initialPrefs, children }) {
+  const [displayPrefs, setDisplayPrefs] = useState(
+    initialPrefs || {
+      resultsStyle: "list"
+      // could be list or thumbnails
+    }
+  );
+  const setResultsStyle = useCallback(
+    (newStyle) => {
+      console.log("changing results style to", newStyle);
+      setDisplayPrefs({ ...displayPrefs, resultsStyle: newStyle });
+    },
+    [displayPrefs]
+  );
+  return /* @__PURE__ */ jsx(
+    DisplayPrefsContext.Provider,
+    {
+      value: { displayPrefs, setDisplayPrefs, setResultsStyle },
+      children
+    }
+  );
+}
+function useDisplayPrefs() {
+  const { displayPrefs, setDisplayPrefs, setResultsStyle } = useContext(DisplayPrefsContext);
+  if (!displayPrefs) {
+    throw new Error(
+      "useDisplayPrefs must be used inside a DisplayPrefsProvider"
+    );
+  }
+  return { displayPrefs, setDisplayPrefs, setResultsStyle };
+}
+function FavoritesResults({ favoritesResults }) {
+  return /* @__PURE__ */ jsx(Fragment, { children: favoritesResults.map((fav) => /* @__PURE__ */ jsx(Fragment, { children: /* @__PURE__ */ jsxs("p", { children: [
+    /* @__PURE__ */ jsx(FavoriteBorder, {}),
+    /* @__PURE__ */ jsx(FavItem, { fav })
+  ] }) }, fav.id)) });
+}
+function FavItem({ fav }) {
+  switch (fav.type) {
+    default:
+      return /* @__PURE__ */ jsxs("p", { children: [
+        fav.favorited.name,
+        /* @__PURE__ */ jsx("img", { src: fav.favorited.first_photo.small_url }),
+        /* @__PURE__ */ jsx(FavIcon, { fav })
+      ] });
+  }
+}
+function FavIcon({ fav }) {
+  switch (fav.type) {
+    case "pattern":
+      return /* @__PURE__ */ jsx(ImportContacts, {});
+    case "project":
+      return /* @__PURE__ */ jsx(BorderColor, {});
+    case "yarn":
+      return /* @__PURE__ */ jsx(Gesture, {});
+    case "stash":
+      return /* @__PURE__ */ jsx(Backpack, {});
+    case "forumpost":
+      return /* @__PURE__ */ jsx(Forum, {});
+    case "designer":
+      return /* @__PURE__ */ jsx(Psychology, {});
+    case "yarnshop":
+      return /* @__PURE__ */ jsx(Store, {});
+    case "yarnbrand":
+      return /* @__PURE__ */ jsx(BrandingWatermark, {});
+    case "bundle":
+      return /* @__PURE__ */ jsx(Workspaces, {});
+    default:
+      return fav.type;
+  }
+}
+function ResultsPreferences() {
+  const { displayPrefs, setResultsStyle } = useDisplayPrefs();
+  const handleAlignment = (event, newAlignment) => {
+    setResultsStyle(newAlignment);
+  };
+  return /* @__PURE__ */ jsxs(
+    ToggleButtonGroup,
+    {
+      value: displayPrefs.resultsStyle,
+      exclusive: true,
+      onChange: handleAlignment,
+      "aria-label": "results display preferences",
+      children: [
+        /* @__PURE__ */ jsx(Tooltip, { title: "Delete", children: /* @__PURE__ */ jsx(ToggleButton, { value: "list", "aria-label": "list with images", children: /* @__PURE__ */ jsx(ViewList, { alt: "View as List" }) }) }),
+        /* @__PURE__ */ jsx(ToggleButton, { value: "thumbnails", "aria-label": "large thumbnails", children: /* @__PURE__ */ jsx(GridView, { alt: "View as Thumbnails" }) })
+      ]
+    }
+  );
+}
+const loader$3 = async ({ request }) => {
+  let { user, tokens } = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/"
+  });
+  const favoritesResults = await getFavorites({
+    accessToken: tokens.access_token,
+    username: user.username
+    /* todo add more search terms */
+  });
+  return json({ user, tokens, favoritesResults });
+};
+function Favorites() {
+  const { favoritesResults } = useLoaderData();
+  return /* @__PURE__ */ jsxs(DisplayPrefsProvider, { children: [
+    /* @__PURE__ */ jsx(Typography, { variant: "h1", component: "h1", sx: { padding: "10px" }, children: "My Favorites" }),
+    /* @__PURE__ */ jsx(ResultsPreferences, {}),
+    /* @__PURE__ */ jsx(FavoritesResults, { favoritesResults }),
+    /* @__PURE__ */ jsx(Typography, { children: "To add something to your Ravelry favorites, please visit Ravelry." })
+  ] });
+}
+const route5 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: Favorites,
+  loader: loader$3
 }, Symbol.toStringTag, { value: "Module" }));
 let action$1 = async ({ request, params }) => {
   await authenticator.logout(request, { redirectTo: "/" });
@@ -682,12 +807,12 @@ function Logout() {
     !(user == null ? void 0 : user.username) && /* @__PURE__ */ jsx(Typography, { variant: "body1", component: "p", children: "You have now logged out of Ravelry." })
   ] });
 }
-const route5 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const route6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action: action$1,
   default: Logout
 }, Symbol.toStringTag, { value: "Module" }));
-const loader$1 = async ({ request }) => {
+const loader$2 = async ({ request }) => {
   let data = await authenticator.isAuthenticated(request, {
     failureRedirect: "/"
   });
@@ -702,10 +827,10 @@ function Profile() {
     /* @__PURE__ */ jsx(Typography, { variant: "body1", component: "p", children: "Right now, Knit Notebook only displays user data from Ravelry." })
   ] });
 }
-const route6 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const route7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Profile,
-  loader: loader$1
+  loader: loader$2
 }, Symbol.toStringTag, { value: "Module" }));
 const meta = () => [
   { title: "Knit Notebook" },
@@ -722,7 +847,7 @@ function Index() {
     /* @__PURE__ */ jsx(Link, { to: "/auth/ravelry", variant: "contained", children: "Sign in with Ravelry" })
   ] });
 }
-const route7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const route8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: Index,
   meta
@@ -742,7 +867,7 @@ function About() {
     /* @__PURE__ */ jsx(Link, { variant: "primaryLink", to: "/", children: "Go to the main page" })
   ] });
 }
-const route8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const route9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: About
 }, Symbol.toStringTag, { value: "Module" }));
@@ -769,17 +894,26 @@ async function getQueue({ username, accessToken }) {
 async function postReorderQueue({
   projectId,
   newPosition,
+  oldPosition,
   username,
   accessToken
 }) {
+  const newSortOrder = newPosition > oldPosition ? newPosition + 2 : newPosition + 1;
   const axiosInstance = axios.create();
   axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
   const response = await axiosInstance.post(
-    `https://api.ravelry.com/people/${username}/queue/${projectId}/reposition.json`,
+    `https://api.ravelry.com/people/${username}/queue/${projectId}/update.json`,
     {
-      insert_at: newPosition + 1
+      sort_order: newSortOrder
       // position is 1-based (not zero-based)
     }
+  );
+  console.log(
+    "response from network",
+    `https://api.ravelry.com/people/${username}/queue/${projectId}/update.json`,
+    { sort_order: newSortOrder },
+    //
+    response
   );
   return response;
 }
@@ -800,17 +934,17 @@ function getHeaders(accessToken) {
     Accept: "application/json"
   };
 }
-const projectRowCss = css`
+const projectRowCss$1 = css`
   display: flex;
   flex-direction: row;
   border: 1px solid #eeeeee;
   margin: 0 0 16px 0;
   cursor: pointer;
 `;
-const detailsCss = css`
+const detailsCss$1 = css`
   flex-grow: 1;
 `;
-const imageCss = css`
+const imageCss$1 = css`
   aspect-ratio: 1; /* make width equal to height  */
   height: auto;
   width: 150px;
@@ -821,6 +955,7 @@ const imageCss = css`
   margin: 0 10px 0 0;
 `;
 function SortableQueueItem({ project }) {
+  let isHydrated = useHydrated();
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: project.id,
     transition: {
@@ -833,23 +968,13 @@ function SortableQueueItem({ project }) {
     transform: CSS.Transform.toString(transform),
     transition
   };
-  return /* @__PURE__ */ jsx(
-    "li",
-    {
-      ref: setNodeRef,
-      style,
-      ...attributes,
-      ...listeners,
-      children: /* @__PURE__ */ jsx(QueueItem, { project })
-    },
-    project.id
-  );
+  return isHydrated ? /* @__PURE__ */ jsx("li", { ref: setNodeRef, style, ...attributes, ...listeners, children: /* @__PURE__ */ jsx(QueueItem, { project }) }) : /* @__PURE__ */ jsx(Fragment, {});
 }
 const QueueItem = forwardRef(({ project }, ref) => {
   const patternPhoto = project == null ? void 0 : project.best_photo;
-  return /* @__PURE__ */ jsxs("div", { className: projectRowCss, ref, children: [
-    patternPhoto && /* @__PURE__ */ jsx("img", { className: imageCss, src: patternPhoto.small_url, alt: "" }),
-    /* @__PURE__ */ jsxs("div", { className: detailsCss, children: [
+  return /* @__PURE__ */ jsxs("div", { className: projectRowCss$1, ref, children: [
+    patternPhoto && /* @__PURE__ */ jsx("img", { className: imageCss$1, src: patternPhoto.small_url, alt: "" }),
+    /* @__PURE__ */ jsxs("div", { className: detailsCss$1, children: [
       /* @__PURE__ */ jsx(Typography, { variant: "h2", component: "h2", children: project.short_pattern_name }, project.id),
       /* @__PURE__ */ jsxs(Typography, { variant: "body2", component: "p", children: [
         "by ",
@@ -863,7 +988,7 @@ const QueueItem = forwardRef(({ project }, ref) => {
         project.pattern.yarn_weight_description
       ] })
     ] }),
-    /* @__PURE__ */ jsx(Drag, { sx: { display: "flex", mr: 1, mt: 1 } })
+    /* @__PURE__ */ jsx(ImportExport, { sx: { display: "flex", mr: 1, mt: 1 } })
   ] }, `item-${project.id}`);
 });
 const queueList = css`
@@ -871,17 +996,16 @@ const queueList = css`
   padding: 0 10px;
   margin: 0px;
 `;
-createContext({});
 function SortableQueue({ queuedProjects, reorderProjects }) {
-  const [activeId, setActiveId] = useState(null);
+  const fetcher = useFetcher();
   const [queue, setQueue] = useState(queuedProjects);
+  const [activeId, setActiveId] = useState(null);
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates
     })
   );
-  const fetcher = useFetcher();
   const activeProject = useMemo(
     () => activeId && queue.find((item) => item.id === activeId),
     [activeId, queue]
@@ -921,7 +1045,8 @@ function SortableQueue({ queuedProjects, reorderProjects }) {
       fetcher.submit(
         {
           projectId,
-          newPosition: newIndex
+          newPosition: newIndex,
+          oldPosition: oldIndex
         },
         {
           fetcherKey: "sort-queue",
@@ -937,7 +1062,7 @@ function SortableQueue({ queuedProjects, reorderProjects }) {
     setActiveId(null);
   }
 }
-const loader = async ({ request }) => {
+const loader$1 = async ({ request }) => {
   let { user, tokens } = await authenticator.isAuthenticated(request, {
     failureRedirect: "/"
   });
@@ -948,7 +1073,7 @@ const loader = async ({ request }) => {
   return json({ user, tokens, queuedProjects });
 };
 async function action({ request }) {
-  const { projectId, newPosition } = await request.json();
+  const { projectId, newPosition, oldPosition } = await request.json();
   let { user, tokens } = await authenticator.isAuthenticated(request, {
     failureRedirect: "/"
   });
@@ -956,6 +1081,7 @@ async function action({ request }) {
     await postReorderQueue({
       projectId,
       newPosition,
+      oldPosition,
       username: user.username,
       accessToken: tokens.access_token
     });
@@ -973,13 +1099,309 @@ function Queue() {
     /* @__PURE__ */ jsx(Typography, { children: "To add something to your Ravelry queue, please visit Ravelry." })
   ] });
 }
-const route9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const route10 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   action,
   default: Queue,
+  loader: loader$1
+}, Symbol.toStringTag, { value: "Module" }));
+async function getStash({
+  username,
+  accessToken,
+  pageSize,
+  currentPage,
+  sortOrder
+}) {
+  const axiosInstance = axios.create();
+  axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+  const response = await axiosInstance.get(
+    `https://api.ravelry.com/people/${username}/stash/list.json?page_size=${pageSize}&page=${currentPage}&sort=${sortOrder}`
+  );
+  const stashOrig = response.data.stash;
+  const stashFull = await Promise.allSettled(
+    stashOrig.map(
+      (stash) => addFullStashInfo({ axiosInstance, stash, username, accessToken })
+    )
+  ).then((promises) => {
+    return promises.filter((promise) => {
+      return promise.status === "fulfilled" ? promise.value : null;
+    }).map((promise) => {
+      return promise.value;
+    });
+  });
+  return { stashes: stashFull, data: response.data };
+}
+async function addFullStashInfo({
+  axiosInstance,
+  username,
+  stash,
+  accessToken
+}) {
+  const stashId = stash.id;
+  const response = await axiosInstance.get(
+    `https://api.ravelry.com/people/${username}/stash/${stashId}.json`
+  );
+  console.log("stash data", response.data.stash);
+  return response.data.stash;
+}
+function Paginator({
+  pageSize,
+  currentPage,
+  numPages,
+  onChangePageNum,
+  onChangePageSize
+}) {
+  console.log(
+    "rendering page number",
+    currentPage,
+    "page size",
+    pageSize,
+    "numPages",
+    numPages
+  );
+  return /* @__PURE__ */ jsxs(Box, { display: "flex", justifyContent: "space-between", children: [
+    /* @__PURE__ */ jsx(Box, { sx: { minWidth: 120 }, children: /* @__PURE__ */ jsxs(FormControl, { fullWidth: true, size: "small", children: [
+      /* @__PURE__ */ jsx(InputLabel, { id: "page-size-label", children: "Page Size" }),
+      /* @__PURE__ */ jsxs(
+        Select,
+        {
+          labelId: "page-size-label",
+          id: "page-size",
+          value: pageSize,
+          label: "Page Size",
+          onChange: onChangePageSize,
+          children: [
+            /* @__PURE__ */ jsx(MenuItem, { value: 10, children: "10" }),
+            /* @__PURE__ */ jsx(MenuItem, { value: 20, children: "20" }),
+            /* @__PURE__ */ jsx(MenuItem, { value: 50, children: "50" })
+          ]
+        }
+      )
+    ] }) }),
+    /* @__PURE__ */ jsx(
+      Pagination,
+      {
+        count: numPages,
+        variant: "outlined",
+        shape: "rounded",
+        size: "large",
+        page: +currentPage,
+        onChange: onChangePageNum
+      }
+    )
+  ] });
+}
+const projectRowCss = css`
+  display: flex;
+  flex-direction: row;
+  //   border: 1px solid #eeeeee;
+  margin: 0 0 16px 0;
+`;
+const linkCss = css`
+  margin: 0 10px 0 0;
+  padding: 0;
+  border: 0;
+  line-height: 0;
+
+  width: 165px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+const detailsCss = css`
+  flex-grow: 1;
+`;
+const imageCss = css`
+  height: 100%;
+  width: 165px;
+  margin: 0;
+  object-fit: cover;
+`;
+const missingImageUrl = `../../images/yarn-ball.jpg`;
+function StashListItem({ stash }) {
+  const { displayPrefs } = useDisplayPrefs();
+  if (displayPrefs.resultsStyle === "list") {
+    return /* @__PURE__ */ jsx(StashListItemRow, { stash });
+  } else {
+    return /* @__PURE__ */ jsx(StashListItemThumbnail, { stash });
+  }
+}
+function StashListItemThumbnail({ stash }) {
+  return /* @__PURE__ */ jsx(Grid, { item: true, xs: 2, sm: 4, md: 4, children: /* @__PURE__ */ jsx(Typography, { variant: "h2", component: "h2", children: stash.name }) }, stash.id);
+}
+function StashListItemRow({ stash }) {
+  var _a;
+  const stashPhoto = stash == null ? void 0 : stash.photos[0];
+  const totalYardage = getTotalYardage(stash == null ? void 0 : stash.packs);
+  return /* @__PURE__ */ jsx(Paper, { elevation: 2, children: /* @__PURE__ */ jsxs("div", { className: projectRowCss, children: [
+    /* @__PURE__ */ jsx(
+      "a",
+      {
+        href: `https://www.ravelry.com/people/marybeshaw/stash/${stash.permalink}`,
+        target: "_blank",
+        className: linkCss,
+        children: /* @__PURE__ */ jsx(
+          "img",
+          {
+            className: imageCss,
+            src: (stashPhoto == null ? void 0 : stashPhoto.medium_url) || missingImageUrl,
+            alt: ""
+          }
+        )
+      }
+    ),
+    /* @__PURE__ */ jsxs("div", { className: detailsCss, children: [
+      /* @__PURE__ */ jsx(Typography, { variant: "h2", component: "h2", children: stash.name }, stash.id),
+      stash.colorway_name && /* @__PURE__ */ jsxs(Typography, { variant: "body2", component: "div", children: [
+        "Colorway: ",
+        stash.colorway_name
+      ] }),
+      stash.long_yarn_weight_name && /* @__PURE__ */ jsxs(Typography, { variant: "body2", component: "div", children: [
+        "Weight: ",
+        stash.long_yarn_weight_name
+      ] }),
+      totalYardage && /* @__PURE__ */ jsxs(Typography, { variant: "body2", component: "div", children: [
+        totalYardage,
+        " yards"
+      ] }),
+      ((_a = stash.stash_status) == null ? void 0 : _a.name) && /* @__PURE__ */ jsx(Typography, { variant: "body2", component: "div", children: stash.stash_status.name }),
+      stash.location && /* @__PURE__ */ jsxs(Typography, { variant: "body2", component: "div", children: [
+        "Location: ",
+        stash.location
+      ] }),
+      stash.notes && /* @__PURE__ */ jsxs(Typography, { variant: "body2", component: "div", children: [
+        "Notes: ",
+        stash.notes
+      ] })
+    ] })
+  ] }) }, `stash-${stash.id}`);
+}
+function getTotalYardage(packs) {
+  if (!packs) {
+    return 0;
+  }
+  packs.reduce(function(acc, pack) {
+    return acc + pack.total_yards;
+  }, 0);
+}
+function StashList({ stashes }) {
+  const { displayPrefs } = useDisplayPrefs();
+  const Tag = displayPrefs.resultsStyle === "list" ? StashListRowStyle : StashListThumbnailStyle;
+  return /* @__PURE__ */ jsx(Tag, { children: stashes.map((stash) => /* @__PURE__ */ jsx(StashListItem, { stash }, `stash-list-item-${stash.id}`)) });
+}
+function StashListRowStyle({ children }) {
+  return /* @__PURE__ */ jsx(Fragment$1, { children });
+}
+function StashListThumbnailStyle({ children }) {
+  return /* @__PURE__ */ jsx(
+    Grid,
+    {
+      container: true,
+      spacing: { xs: 2, md: 3 },
+      columns: { xs: 4, sm: 8, md: 12 },
+      children
+    }
+  );
+}
+const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_CURRENT_PAGE = 1;
+const DEFAULT_SORT_ORDER = "recent";
+const stashListWrapperCss = css`
+  margin-right: 4px; // to match the paginator form's right margin
+`;
+async function loader({ request }) {
+  let { user, tokens } = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/"
+  });
+  const searchParams = new URL(request.url).searchParams;
+  const pageSize = searchParams.get("pageSize") || DEFAULT_PAGE_SIZE;
+  const currentPage = searchParams.get("currentPage") || DEFAULT_CURRENT_PAGE;
+  const sortOrder = searchParams.get("sortOrder") || DEFAULT_SORT_ORDER;
+  const { stashes, data } = await getStash({
+    accessToken: tokens.access_token,
+    username: user.username,
+    pageSize,
+    page: currentPage,
+    sortOrder
+  });
+  return json({
+    user,
+    tokens,
+    stashes,
+    data,
+    pageProps: { pageSize, currentPage, sortOrder }
+  });
+}
+function Stash() {
+  const { stashes, data, pageProps } = useLoaderData();
+  const [searchParams] = useSearchParams();
+  const numPages = data.paginator.last_page;
+  console.log(
+    "num results",
+    data.paginator.results,
+    "page size",
+    pageProps.pageSize,
+    "current page",
+    pageProps.currentPage,
+    "sort order",
+    pageProps.sortOrder,
+    "num pages",
+    numPages
+  );
+  console.log("data", data);
+  function handleChangePageNum(e, value) {
+    console.log("change page number to", value);
+    searchParams.set("currentPage", value);
+  }
+  function handleChangePageSize(e) {
+    console.log("change page size to", e.target.value);
+    searchParams.set("pageSize", e.target.value);
+  }
+  return /* @__PURE__ */ jsxs(DisplayPrefsProvider, { children: [
+    /* @__PURE__ */ jsxs(
+      Unstable_Grid2,
+      {
+        container: true,
+        spacing: 3,
+        columnSpacing: { xs: 1, sm: 2, md: 3 },
+        disableEqualOverflow: true,
+        sx: { marginBottom: "10px" },
+        children: [
+          /* @__PURE__ */ jsx(Unstable_Grid2, { xs: 12, sm: 8, children: /* @__PURE__ */ jsx(Typography, { variant: "h1", component: "h1", sx: { padding: "10px" }, children: "My Yarn Collection" }) }),
+          /* @__PURE__ */ jsx(
+            Unstable_Grid2,
+            {
+              xs: 12,
+              sm: 4,
+              display: "flex",
+              justifyContent: "right",
+              alignItems: "right",
+              children: /* @__PURE__ */ jsx(ResultsPreferences, {})
+            }
+          )
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsx("div", { className: stashListWrapperCss, children: /* @__PURE__ */ jsx(StashList, { stashes }) }),
+    /* @__PURE__ */ jsx(
+      Paginator,
+      {
+        pageSize: pageProps.pageSize,
+        currentPage: pageProps.currentPage,
+        onChangePageNum: handleChangePageNum,
+        onChangePageSize: handleChangePageSize,
+        numPages
+      }
+    ),
+    /* @__PURE__ */ jsx(Typography, { children: "To add something to your Ravelry stash, please visit Ravelry." })
+  ] });
+}
+const route11 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: Stash,
   loader
 }, Symbol.toStringTag, { value: "Module" }));
-const serverManifest = { "entry": { "module": "/assets/entry.client-DMwlMsnu.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-CI10phDB.js", "/assets/index-ASZ93w5C.js", "/assets/theme-CsKrMJxd.js", "/assets/components-Bd1wM9pL.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-CWQ_D2oM.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-CI10phDB.js", "/assets/index-ASZ93w5C.js", "/assets/theme-CsKrMJxd.js", "/assets/components-Bd1wM9pL.js", "/assets/Typography-_VhkBNkm.js", "/assets/useIsFocusVisible-BK8dAlmh.js", "/assets/Link-C5cBJoP4.js", "/assets/UserProvider-DlDRyGY6.js", "/assets/createIcon-DKtQoX0T.js"], "css": [] }, "routes/auth.ravelry.callback": { "id": "routes/auth.ravelry.callback", "parentId": "routes/auth.ravelry", "path": "callback", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry.callback-C5JH9ZGC.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/index-ASZ93w5C.js", "/assets/components-Bd1wM9pL.js"], "css": [] }, "routes/auth.ravelry": { "id": "routes/auth.ravelry", "parentId": "root", "path": "auth/ravelry", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/login-failed": { "id": "routes/login-failed", "parentId": "root", "path": "login-failed", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/login-failed-TM3j_Pv9.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js"], "css": [] }, "routes/dashboard": { "id": "routes/dashboard", "parentId": "root", "path": "dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/dashboard-CltN4q2N.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-CI10phDB.js", "/assets/index-ASZ93w5C.js", "/assets/Typography-_VhkBNkm.js", "/assets/useIsFocusVisible-BK8dAlmh.js", "/assets/Link-C5cBJoP4.js", "/assets/components-Bd1wM9pL.js"], "css": [] }, "routes/sign-out": { "id": "routes/sign-out", "parentId": "root", "path": "sign-out", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sign-out-CO-jtMst.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-CI10phDB.js", "/assets/Typography-_VhkBNkm.js", "/assets/useIsFocusVisible-BK8dAlmh.js", "/assets/index-ASZ93w5C.js", "/assets/UserProvider-DlDRyGY6.js", "/assets/components-Bd1wM9pL.js"], "css": [] }, "routes/profile": { "id": "routes/profile", "parentId": "root", "path": "profile", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/profile-FJslbPVO.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/index-ASZ93w5C.js", "/assets/DefaultPropsProvider-CI10phDB.js", "/assets/components-Bd1wM9pL.js", "/assets/Typography-_VhkBNkm.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-1_mLhKWp.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-CI10phDB.js", "/assets/index-ASZ93w5C.js", "/assets/Typography-_VhkBNkm.js", "/assets/useIsFocusVisible-BK8dAlmh.js", "/assets/Link-C5cBJoP4.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-DlTlJiV5.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-CI10phDB.js", "/assets/index-ASZ93w5C.js", "/assets/Typography-_VhkBNkm.js", "/assets/useIsFocusVisible-BK8dAlmh.js", "/assets/Link-C5cBJoP4.js"], "css": [] }, "routes/queue": { "id": "routes/queue", "parentId": "root", "path": "queue", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/queue-DLzmCzgf.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-CI10phDB.js", "/assets/Typography-_VhkBNkm.js", "/assets/index-ASZ93w5C.js", "/assets/createIcon-DKtQoX0T.js", "/assets/components-Bd1wM9pL.js"], "css": [] } }, "url": "/assets/manifest-b0fe4fea.js", "version": "b0fe4fea" };
+const serverManifest = { "entry": { "module": "/assets/entry.client-DWODdhUV.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-DAnhN6oH.js", "/assets/index-Bm93K0U-.js", "/assets/index-D90acgM7.js", "/assets/theme-CzDbLl9l.js", "/assets/GlobalStyles-CMtFhkOZ.js", "/assets/components-DJ55LjMZ.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-BW3-1ZmM.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-DAnhN6oH.js", "/assets/index-Bm93K0U-.js", "/assets/index-D90acgM7.js", "/assets/theme-CzDbLl9l.js", "/assets/GlobalStyles-CMtFhkOZ.js", "/assets/components-DJ55LjMZ.js", "/assets/Typography-CbunWm-a.js", "/assets/useIsFocusVisible-VR3Qdb5l.js", "/assets/ButtonBase-Dj9uuRPZ.js", "/assets/Tooltip-CJOwkLwv.js", "/assets/Link-Iljc2CrZ.js", "/assets/UserProvider-DZWmR8mT.js", "/assets/MenuItem-D42l22xF.js", "/assets/createSvgIcon-DTYW70ZG.js"], "css": [] }, "routes/auth.ravelry.callback": { "id": "routes/auth.ravelry.callback", "parentId": "routes/auth.ravelry", "path": "callback", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry.callback-CnpGb9ZP.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/index-D90acgM7.js", "/assets/components-DJ55LjMZ.js"], "css": [] }, "routes/auth.ravelry": { "id": "routes/auth.ravelry", "parentId": "root", "path": "auth/ravelry", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/login-failed": { "id": "routes/login-failed", "parentId": "root", "path": "login-failed", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/login-failed-TM3j_Pv9.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js"], "css": [] }, "routes/dashboard": { "id": "routes/dashboard", "parentId": "root", "path": "dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/dashboard-DUhHeA-E.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-DAnhN6oH.js", "/assets/index-D90acgM7.js", "/assets/Typography-CbunWm-a.js", "/assets/useIsFocusVisible-VR3Qdb5l.js", "/assets/Link-Iljc2CrZ.js"], "css": [] }, "routes/favorites": { "id": "routes/favorites", "parentId": "root", "path": "favorites", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/favorites-mM0EhlYj.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-DAnhN6oH.js", "/assets/Typography-CbunWm-a.js", "/assets/useIsFocusVisible-VR3Qdb5l.js", "/assets/index-Bm93K0U-.js", "/assets/index-D90acgM7.js", "/assets/ButtonBase-Dj9uuRPZ.js", "/assets/Tooltip-CJOwkLwv.js", "/assets/createSvgIcon-DTYW70ZG.js", "/assets/ResultsPreferences-yTSzwyOV.js", "/assets/components-DJ55LjMZ.js"], "css": [] }, "routes/sign-out": { "id": "routes/sign-out", "parentId": "root", "path": "sign-out", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sign-out-DOiIRGRU.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-DAnhN6oH.js", "/assets/index-D90acgM7.js", "/assets/Typography-CbunWm-a.js", "/assets/useIsFocusVisible-VR3Qdb5l.js", "/assets/UserProvider-DZWmR8mT.js", "/assets/components-DJ55LjMZ.js", "/assets/ButtonBase-Dj9uuRPZ.js"], "css": [] }, "routes/profile": { "id": "routes/profile", "parentId": "root", "path": "profile", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/profile-D4R9MfEK.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/index-D90acgM7.js", "/assets/DefaultPropsProvider-DAnhN6oH.js", "/assets/components-DJ55LjMZ.js", "/assets/Typography-CbunWm-a.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-CmTE65so.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-DAnhN6oH.js", "/assets/index-D90acgM7.js", "/assets/Typography-CbunWm-a.js", "/assets/useIsFocusVisible-VR3Qdb5l.js", "/assets/Link-Iljc2CrZ.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-ByHDLAg1.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-DAnhN6oH.js", "/assets/index-D90acgM7.js", "/assets/Typography-CbunWm-a.js", "/assets/useIsFocusVisible-VR3Qdb5l.js", "/assets/Link-Iljc2CrZ.js"], "css": [] }, "routes/queue": { "id": "routes/queue", "parentId": "root", "path": "queue", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/queue-KOscIY9v.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-DAnhN6oH.js", "/assets/Typography-CbunWm-a.js", "/assets/index-D90acgM7.js", "/assets/emotion-css.development.esm-MDCT8pKE.js", "/assets/createSvgIcon-DTYW70ZG.js", "/assets/components-DJ55LjMZ.js"], "css": [] }, "routes/stash": { "id": "routes/stash", "parentId": "root", "path": "stash", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/stash-UGAtzecF.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-DAnhN6oH.js", "/assets/Typography-CbunWm-a.js", "/assets/useIsFocusVisible-VR3Qdb5l.js", "/assets/index-Bm93K0U-.js", "/assets/index-D90acgM7.js", "/assets/ButtonBase-Dj9uuRPZ.js", "/assets/Tooltip-CJOwkLwv.js", "/assets/createSvgIcon-DTYW70ZG.js", "/assets/emotion-css.development.esm-MDCT8pKE.js", "/assets/ResultsPreferences-yTSzwyOV.js", "/assets/MenuItem-D42l22xF.js", "/assets/GlobalStyles-CMtFhkOZ.js", "/assets/components-DJ55LjMZ.js"], "css": [] } }, "url": "/assets/manifest-a7bb16f7.js", "version": "a7bb16f7" };
 const mode = "production";
 const assetsBuildDirectory = "build/client";
 const basename = "/";
@@ -1028,13 +1450,21 @@ const routes = {
     caseSensitive: void 0,
     module: route4
   },
+  "routes/favorites": {
+    id: "routes/favorites",
+    parentId: "root",
+    path: "favorites",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route5
+  },
   "routes/sign-out": {
     id: "routes/sign-out",
     parentId: "root",
     path: "sign-out",
     index: void 0,
     caseSensitive: void 0,
-    module: route5
+    module: route6
   },
   "routes/profile": {
     id: "routes/profile",
@@ -1042,7 +1472,7 @@ const routes = {
     path: "profile",
     index: void 0,
     caseSensitive: void 0,
-    module: route6
+    module: route7
   },
   "routes/_index": {
     id: "routes/_index",
@@ -1050,7 +1480,7 @@ const routes = {
     path: void 0,
     index: true,
     caseSensitive: void 0,
-    module: route7
+    module: route8
   },
   "routes/about": {
     id: "routes/about",
@@ -1058,7 +1488,7 @@ const routes = {
     path: "about",
     index: void 0,
     caseSensitive: void 0,
-    module: route8
+    module: route9
   },
   "routes/queue": {
     id: "routes/queue",
@@ -1066,7 +1496,15 @@ const routes = {
     path: "queue",
     index: void 0,
     caseSensitive: void 0,
-    module: route9
+    module: route10
+  },
+  "routes/stash": {
+    id: "routes/stash",
+    parentId: "root",
+    path: "stash",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route11
   }
 };
 export {

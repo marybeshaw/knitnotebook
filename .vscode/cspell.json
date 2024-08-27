@@ -3,7 +3,12 @@
         "@cspell/dict-html-symbol-entities/cspell-ext.json"
     ],
     "words": [
+        "forumpost",
         "haspopup",
-        "linebreak"
+        "isbot",
+        "linebreak",
+        "Prefs",
+        "yarnbrand",
+        "yarnshop"
     ]
 }

@@ -1,10 +1,11 @@
-import { forwardRef } from "react"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { forwardRef, Fragment } from "react"
+import { useHydrated } from "remix-utils/use-hydrated"
 
-import { Typography } from "@mui/material"
-import { Drag } from "mdi-material-ui"
 import { css } from "@emotion/css"
+import { ImportExport } from "@mui/icons-material"
+import { Typography } from "@mui/material"
 
 const projectRowCss = css`
   display: flex;
@@ -29,6 +30,8 @@ const imageCss = css`
 `
 
 export default function SortableQueueItem({ project }) {
+  let isHydrated = useHydrated() // don't conditionally render anything with cookie data unless hydrated (i.e., definitely on the client)
+
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id: project.id,
@@ -42,16 +45,12 @@ export default function SortableQueueItem({ project }) {
     transition,
   }
 
-  return (
-    <li
-      key={project.id}
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-    >
+  return isHydrated ? (
+    <li ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <QueueItem project={project} />
     </li>
+  ) : (
+    <Fragment></Fragment>
   )
 }
 
@@ -75,7 +74,7 @@ export const QueueItem = forwardRef(({ project }, ref) => {
         </Typography>
       </div>
 
-      <Drag sx={{ display: "flex", mr: 1, mt: 1 }} />
+      <ImportExport sx={{ display: "flex", mr: 1, mt: 1 }} />
     </div>
   )
 })

@@ -13,7 +13,7 @@ export default function Copyright() {
       </Typography>
       <Typography variant="body2" color="text.secondary" align="center">
         This application is not affiliated with Ravelry in any way, and is not
-        endorsed or associated with Ravelry.
+        endorsed by or associated with Ravelry.
       </Typography>
     </Fragment>
   )

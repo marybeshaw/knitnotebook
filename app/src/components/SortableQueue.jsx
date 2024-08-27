@@ -1,10 +1,10 @@
-import { createContext, useContext, useMemo, useState } from "react"
 import { useFetcher } from "@remix-run/react"
+import { useMemo, useState } from "react"
 
 import {
+  closestCenter,
   DndContext,
   DragOverlay,
-  closestCenter,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -27,18 +27,19 @@ const queueList = css`
   margin: 0px;
 `
 
-const QueueDragContext = createContext({})
-
 export default function SortableQueue({ queuedProjects, reorderProjects }) {
-  const [activeId, setActiveId] = useState(null)
-  const [queue, setQueue] = useState(queuedProjects)
+  const fetcher = useFetcher()
+
+  const [queue, setQueue] = useState(queuedProjects) // Drag & Drop will reorder this queue
+
+  // Drag & Drop Settings
+  const [activeId, setActiveId] = useState(null) // Holds the id of an item being dragged
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
   )
-  const fetcher = useFetcher()
 
   // This is a "derived variable" - we useMemo when it is expensive
   const activeProject = useMemo(
@@ -95,6 +96,7 @@ export default function SortableQueue({ queuedProjects, reorderProjects }) {
         {
           projectId,
           newPosition: newIndex,
+          oldPosition: oldIndex,
         },
         {
           fetcherKey: "sort-queue",

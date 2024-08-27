@@ -1,5 +1,5 @@
 import { Fragment } from "react"
-import { useLoaderData, json } from "@remix-run/react"
+import { /*useLoaderData,*/ json } from "@remix-run/react"
 import { authenticator } from "../services/auth.server"
 import { Typography } from "@mui/material"
 import Link from "../src/components/Link"
@@ -13,8 +13,7 @@ export const loader = async ({ request }) => {
 }
 
 export default function Dashboard() {
-  const { user } = useLoaderData()
-  console.log("rendering dashboard", user)
+  // const { user } = useLoaderData()
 
   return (
     <Fragment>

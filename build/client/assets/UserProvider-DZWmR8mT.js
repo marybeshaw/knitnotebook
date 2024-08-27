@@ -1,0 +1,1 @@
+import{r,j as n}from"./jsx-runtime-BJa62n0-.js";const s=r.createContext({});function x({user:e,children:t}){const[o,u]=r.useState();return n.jsx(s.Provider,{value:{user:o?void 0:e,setLoggedOut:u},children:t})}function c(){const{user:e,setLoggedOut:t}=r.useContext(s);return{user:e,setLoggedOut:t}}export{x as U,c as u};

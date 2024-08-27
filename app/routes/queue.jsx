@@ -1,5 +1,5 @@
+import { json, useLoaderData } from "@remix-run/react"
 import { Fragment } from "react"
-import { useLoaderData, json } from "@remix-run/react"
 
 import { authenticator } from "../services/auth.server"
 import { getQueue, postReorderQueue } from "../services/queue.server"
@@ -20,7 +20,7 @@ export const loader = async ({ request }) => {
 }
 
 export async function action({ request }) {
-  const { projectId, newPosition } = await request.json()
+  const { projectId, newPosition, oldPosition } = await request.json()
   let { user, tokens } = await authenticator.isAuthenticated(request, {
     failureRedirect: "/",
   })
@@ -28,6 +28,7 @@ export async function action({ request }) {
     await postReorderQueue({
       projectId,
       newPosition,
+      oldPosition,
       username: user.username,
       accessToken: tokens.access_token,
     })

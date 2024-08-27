@@ -1,5 +1,9 @@
 import axios from "axios"
 
+/**
+ * List the entire user's queue
+ * (well,the first 50; pagination is not yet supported)
+ */
 export async function getQueue({ username, accessToken }) {
   const axiosInstance = axios.create()
 
@@ -30,24 +34,36 @@ export async function getQueue({ username, accessToken }) {
   return queuedProjectResults
 }
 
+/**
+ * Move an item from one place in the queue to another.
+ */
 export async function postReorderQueue({
   projectId,
   newPosition,
+  oldPosition,
   username,
   accessToken,
 }) {
+  // If we move down in the list, we have to add 2 (this item counts +1 extra for the old spot in the list)
+  const newSortOrder =
+    newPosition > oldPosition ? newPosition + 2 : newPosition + 1
   const axiosInstance = axios.create()
   axiosInstance.defaults.headers.common["Authorization"] =
     `Bearer ${accessToken}`
 
   // docs at https://www.ravelry.com/api#queue_reposition
   const response = await axiosInstance.post(
-    `https://api.ravelry.com/people/${username}/queue/${projectId}/reposition.json`,
+    `https://api.ravelry.com/people/${username}/queue/${projectId}/update.json`,
     {
-      insert_at: newPosition + 1, // position is 1-based (not zero-based)
+      sort_order: newSortOrder, // position is 1-based (not zero-based)
     },
   )
-
+  console.log(
+    "response from network",
+    `https://api.ravelry.com/people/${username}/queue/${projectId}/update.json`,
+    { sort_order: newSortOrder }, //
+    response,
+  )
   return response
 }
 

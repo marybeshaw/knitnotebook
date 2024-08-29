@@ -1011,7 +1011,10 @@ const loader$3 = async ({ request }) => {
   const sortOrder = searchParams.get("sortOrder") || DEFAULT_SORT_ORDER$1;
   const searchText = searchParams.get("searchText") || "";
   const currentPage = searchParams.get("currentPage") ? +searchParams.get("currentPage") : DEFAULT_CURRENT_PAGE$1;
-  const { favorites, data } = await getFavorites({
+  const {
+    favorites
+    /*,data*/
+  } = await getFavorites({
     accessToken: tokens.access_token,
     username: user.username,
     /* todo add more search terms */

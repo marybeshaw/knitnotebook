@@ -30,7 +30,7 @@ export const loader = async ({ request }) => {
     : DEFAULT_CURRENT_PAGE
 
   // todo fix this to work like stash does
-  const { favorites, data } = await getFavorites({
+  const { favorites /*,data*/ } = await getFavorites({
     accessToken: tokens.access_token,
     username: user.username,
     /* todo add more search terms */

@@ -1,7 +1,7 @@
 import { Authenticator } from "remix-auth"
 import { OAuth2Strategy } from "remix-auth-oauth2"
-import axios from "axios"
 
+import { getAxiosInstance } from "./axios.server"
 import { sessionStorage } from "./session.server"
 
 const domain =
@@ -44,17 +44,13 @@ export const ravelryStrategy = new OAuth2Strategy(
     tokenEndpoint: `https://www.ravelry.com/oauth2/token`,
   },
   async ({ tokens, profile, context, request }) => {
-    const axiosInstance = axios.create()
-
-    axiosInstance.defaults.headers.common["Authorization"] =
-      `Bearer ${tokens.access_token}`
+    const axiosInstance = getAxiosInstance({ accessToken: tokens.access_token })
 
     // add user profile information to session data
     const response = await axiosInstance.get(
       "https://api.ravelry.com/current_user.json",
     )
 
-    // console.log("current_user response data", response.data)
     return { tokens, profile, user: response.data.user }
   },
 )

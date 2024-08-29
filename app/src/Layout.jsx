@@ -1,25 +1,27 @@
-import * as React from "react"
 import { Box, Container } from "@mui/material"
+import { Fragment } from "react"
 
-import ResponsiveAppBar from "./navigation/ResponsiveAppBar"
 import Copyright from "./Copyright"
+import ResponsiveAppBar from "./navigation/ResponsiveAppBar"
 
 export default function Layout({ children }) {
   return (
-    <Container
-      maxWidth="xl"
-      sx={{
-        margin: 0,
-        display: "grid",
-        gridTemplateRows: "auto 1fr auto",
-        minHeight: "100vh",
-      }}
-    >
+    <Fragment>
       <ResponsiveAppBar />
-      <Box sx={{ my: 4 }}>{children}</Box>
+      <Container
+        maxWidth="xl"
+        sx={{
+          margin: 0,
+          display: "grid",
+          gridTemplateRows: "auto 1fr auto",
+          minHeight: "100vh",
+        }}
+      >
+        <Box sx={{ my: 4 }}>{children}</Box>
 
-      <Footer />
-    </Container>
+        <Footer />
+      </Container>
+    </Fragment>
   )
 }
 

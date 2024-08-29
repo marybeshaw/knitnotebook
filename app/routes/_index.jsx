@@ -1,6 +1,6 @@
-import * as React from "react"
-import Link from "../src/components/Link"
 import { Typography } from "@mui/material"
+import * as React from "react"
+import Link from "../src/routing/Link"
 
 // https://remix.run/docs/en/main/route/meta
 export const meta = () => [

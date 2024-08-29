@@ -1,6 +1,6 @@
-import React, { Fragment } from "react"
-import Link from "../src/components/Link"
 import { Link as MLink, Typography } from "@mui/material"
+import { Fragment } from "react"
+import Link from "../src/routing/Link"
 
 export default function About() {
   return (

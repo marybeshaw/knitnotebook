@@ -63,7 +63,7 @@ let theme = createTheme({
     button: {
       fontFamily: skippySharp,
       fontWeight: 400,
-      fontSize: 20,
+      fontSize: 26,
       textTransform: "none",
     },
     primaryLink: {
@@ -109,37 +109,37 @@ theme = createTheme(theme, {
   palette: {
     default: theme.palette.augmentColor({
       color: {
-        main: "#077cdd",
+        main: "#4884a4",
       },
     }),
     primary: theme.palette.augmentColor({
       color: {
-        main: "#077cdd",
+        main: "#4884a4",
       },
     }),
     secondary: theme.palette.augmentColor({
       color: {
-        main: "#a112b3",
+        main: "#854092",
       },
     }),
     error: theme.palette.augmentColor({
       color: {
-        main: "#d10f45",
+        main: "#c53468",
       },
     }),
     warning: theme.palette.augmentColor({
       color: {
-        main: "#995c00",
+        main: "#7d5735",
       },
     }),
     info: theme.palette.augmentColor({
       color: {
-        main: "#039eb1",
+        main: "#319ba0",
       },
     }),
     success: theme.palette.augmentColor({
       color: {
-        main: "#5120b4",
+        main: "#47549b",
       },
     }),
   },

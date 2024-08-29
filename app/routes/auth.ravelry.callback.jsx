@@ -1,6 +1,6 @@
 import { useLoaderData } from "@remix-run/react"
 
-// after auth.ravelry.callback, remix sends the user back to this page, which doesn't do anything.
+// after auth, remix sends the user back to this page, which doesn't do anything.
 // look in auth.ravelry.jsx
 export const loader = async ({ request }) => {
   return { loader: true }

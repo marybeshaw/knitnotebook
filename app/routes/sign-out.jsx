@@ -37,10 +37,14 @@ export default function Logout() {
       </Typography>
       {user?.username && (
         <Form onSubmit={handleSubmit}>
-          <Typography variant="body2" component="p">
+          <Typography
+            variant="body2"
+            component="p"
+            sx={{ marginTop: 1, marginBottom: 2 }}
+          >
             Are you sure you want to sign out?
           </Typography>
-          <Button value="logout" type="submit">
+          <Button value="logout" type="submit" variant="contained">
             Yes, Sign Out
           </Button>
         </Form>

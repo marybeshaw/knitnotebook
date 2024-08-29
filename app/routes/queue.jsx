@@ -4,7 +4,7 @@ import { Fragment } from "react"
 import { authenticator } from "../services/auth.server"
 import { getQueue, postReorderQueue } from "../services/queue.server"
 
-import SortableQueue from "../src/components/SortableQueue"
+import SortableQueue from "../src/queue/SortableQueue"
 
 import { Typography } from "@mui/material"
 
@@ -32,7 +32,7 @@ export async function action({ request }) {
       username: user.username,
       accessToken: tokens.access_token,
     })
-    // console.log(`moving item ${projectId} to ${newPosition}`)
+
     return true
   } catch (e) {
     console.log("queue reorder error:", e)

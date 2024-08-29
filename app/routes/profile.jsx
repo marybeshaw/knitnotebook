@@ -1,5 +1,5 @@
+import { json, useLoaderData } from "@remix-run/react"
 import { Fragment } from "react"
-import { useLoaderData, json } from "@remix-run/react"
 import { authenticator } from "../services/auth.server"
 
 import { Typography } from "@mui/material"
@@ -15,7 +15,7 @@ export const loader = async ({ request }) => {
 export default function Profile() {
   // let isHydrated = useHydrated() // don't conditionally render anything with cookie data unless hydrated (i.e., definitely on the client)
   const { user } = useLoaderData()
-  // console.log("rendering profile", user)
+
   return (
     <Fragment>
       <Typography variant="h1" component="h1">

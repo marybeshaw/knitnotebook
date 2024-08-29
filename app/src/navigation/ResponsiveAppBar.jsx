@@ -1,11 +1,10 @@
 import * as React from "react"
-import Link from "../components/Link"
+import Link from "../routing/Link"
 
 import {
   AppBar,
   Avatar,
   Box,
-  Button,
   Container,
   IconButton,
   Menu,

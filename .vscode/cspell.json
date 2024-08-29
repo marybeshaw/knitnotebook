@@ -3,6 +3,7 @@
         "@cspell/dict-html-symbol-entities/cspell-ext.json"
     ],
     "words": [
+        "colorfamily",
         "forumpost",
         "haspopup",
         "isbot",

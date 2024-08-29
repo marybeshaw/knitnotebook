@@ -17,6 +17,7 @@
     "rules": {
         "react/prop-types": 0,
         "react/no-unknown-property": ["warn", { "ignore": [] }],
+        "react/no-unescaped-entities": 0,
         "indent": ["error", 2],
         "linebreak-style": 1,
         "react-hooks/rules-of-hooks": "error",

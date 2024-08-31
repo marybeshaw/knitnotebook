@@ -17,6 +17,12 @@ export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
         host: "localhost",
       },
       plugins: [remix()],
+      build: {
+        manifest: true,
+        rollupOptions: {
+          external: ["/app/routes/about.test.jsx", "**/*.test.jsx"],
+        },
+      },
     }
   }
   return { plugins: [remix()] }

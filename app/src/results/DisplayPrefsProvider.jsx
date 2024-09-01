@@ -58,6 +58,8 @@ export default function DisplayPrefsProvider({ initialPrefs, children }) {
 export function useDisplayPrefs() {
   const { displayPrefs, setDisplayPrefs, setResultsStyle } =
     useContext(DisplayPrefsContext)
+
+  // Put this in one hook, and test the error case in only one component, and you have coverage!
   if (!displayPrefs) {
     throw new Error(
       "useDisplayPrefs must be used inside a DisplayPrefsProvider",

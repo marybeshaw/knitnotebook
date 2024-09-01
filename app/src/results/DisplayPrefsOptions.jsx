@@ -19,7 +19,7 @@ export default function DisplayPrefsOptions() {
       }}
       aria-label="results display preferences"
     >
-      <Tooltip title="Delete">
+      <Tooltip title="Display Preferences">
         <ToggleButton value="list" aria-label="list with images">
           <ViewList alt="View as List" />
         </ToggleButton>

@@ -5,13 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="71b13bb3-4d89-4637-80b2-e06918e4ccb1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/UtahJS 2024 - Complex State in React.pptx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.husky/pre-commit" beforeDir="false" afterPath="$PROJECT_DIR$/.husky/pre-commit" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.husky/pre-push" beforeDir="false" afterPath="$PROJECT_DIR$/.husky/pre-push" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/~$UtahJS 2024 - Complex State in React.pptx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/results/DisplayPrefsOptions.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/results/DisplayPrefsOptions.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/results/DisplayPrefsProvider.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/results/DisplayPrefsProvider.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,7 +58,7 @@
       <updated>1724784693859</updated>
       <workItem from="1724784694908" duration="1307000" />
       <workItem from="1725133986336" duration="693000" />
-      <workItem from="1725145969849" duration="4080000" />
+      <workItem from="1725145969849" duration="4474000" />
     </task>
     <servers />
   </component>

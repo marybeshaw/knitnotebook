@@ -26,10 +26,14 @@ export default function NoResults({ searchText, dataType = "stash" }) {
       {searchText ? (
         <Fragment>
           <Typography variant="body2" sx={{ marginBottom: 2 }}>
-            No stash yarn matches your search term, {searchText}.
+            {dataType === "favorites"
+              ? "No favorites match"
+              : "No stash yarn matches"}{" "}
+            your search term, {searchText}.
           </Typography>
           <Button onClick={handleClick} variant="contained">
-            See your entire stash
+            See your entire{" "}
+            {dataType === "favorites" ? "favorites list" : "stash"}
           </Button>
         </Fragment>
       ) : (

@@ -1,0 +1,11 @@
+import{j as e,r as n}from"./jsx-runtime-BJa62n0-.js";import{c as s}from"./emotion-css.development.esm-CNBYDLmo.js";import{L as p}from"./Link-S1ptO2_9.js";import{T as a}from"./Typography-wcXED6J0.js";import{C as h,a as l,b as c,c as m}from"./CardMedia-3qf8g595.js";import"./DefaultPropsProvider-EXnQoTJj.js";import"./index-DOTPFuaT.js";import"./Link-BYYak0VS.js";import"./useIsFocusVisible-CPlKmROo.js";import"./chainPropTypes-CPkqCYVL.js";import"./Paper-d-ALm8uW.js";import"./useTheme-5sFMoId9.js";const d=s`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 0 -8px;
+`,x=s`
+  margin: 3px 8px 8px;
+  flex: 1 0 21%;
+  max-width: 350px;
+  min-width: 250px;
+`,u=[{name:"Projects",path:"/projects",description:"See all of your knitting projects in one place! The good, the bad, and maybe the ugly....",splashUrl:"../images/projects-splash.jpeg"},{name:"Queue",path:"/queue",description:"What will you work on next? Possibilities are endless, but they are here!",splashUrl:"../images/queue-splash.jpeg"},{name:"Stash",path:"/stash",description:'Do you have a "stash beyond live expectancy" (SABLE)? Click to find out!',splashUrl:"../images/stash-splash.jpeg"},{name:"Favorites",path:"/favorites",description:"See and search the Ravelry items you love, including projects, patterns, and forum posts!",splashUrl:"../images/favorites-splash.jpeg"}];function D(){return e.jsxs(n.Fragment,{children:[e.jsx(a,{variant:"h1",component:"h1",children:"Knit Notebook Dashboard"}),e.jsx(a,{variant:"body2",component:"p",children:"Welcome to your Knit Notebook, where you can update your Ravelry notebook with a different UI for a limited time."}),e.jsx(a,{variant:"body2",component:"p",children:"What will you work on next?"}),e.jsx("div",{className:d,children:u.map(t=>e.jsx(j,{...t},t.name))})]})}function j({name:t,path:o,description:r,splashUrl:i}){return e.jsx("div",{className:x,children:e.jsxs(h,{sx:{maxWidth:345},children:[e.jsx(l,{sx:{height:140},image:i,title:""}),e.jsxs(c,{children:[e.jsx(a,{gutterBottom:!0,variant:"h5",component:"div",children:t}),e.jsx(a,{variant:"body2",sx:{color:"text.secondary"},children:r})]}),e.jsx(m,{children:e.jsxs(p,{to:o,variant:"contained",children:["Visit your ",t]})})]})})}export{D as default};

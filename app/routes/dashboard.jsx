@@ -41,28 +41,28 @@ const cardItems = [
     path: "/projects",
     description:
       "See all of your knitting projects in one place! The good, the bad, and maybe the ugly....",
-    splashUrl: "../public/images/projects-splash.jpeg",
+    splashUrl: "../images/projects-splash.jpeg",
   },
   {
     name: "Queue",
     path: "/queue",
     description:
       "What will you work on next? Possibilities are endless, but they are here!",
-    splashUrl: "../public/images/queue-splash.jpeg",
+    splashUrl: "../images/queue-splash.jpeg",
   },
   {
     name: "Stash",
     path: "/stash",
     description:
       'Do you have a "stash beyond live expectancy" (SABLE)? Click to find out!',
-    splashUrl: "../public/images/stash-splash.jpeg",
+    splashUrl: "../images/stash-splash.jpeg",
   },
   {
     name: "Favorites",
     path: "/favorites",
     description:
       "See and search the Ravelry items you love, including projects, patterns, and forum posts!",
-    splashUrl: "../public/images/favorites-splash.jpeg",
+    splashUrl: "../images/favorites-splash.jpeg",
   },
 ]
 

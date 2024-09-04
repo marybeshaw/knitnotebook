@@ -70,8 +70,6 @@ export default function Stash() {
   // uch simpler than a useEffect!
   const numPages = data?.paginator?.last_page || 1
 
-  console.log("search text?", pageProps.searchText)
-
   return (
     <DisplayPrefsProvider>
       <HeaderRow {...pageProps}>My Yarn Collection</HeaderRow>

@@ -25,9 +25,11 @@ export default function DisplayPrefsOptions() {
         </ToggleButton>
       </Tooltip>
 
-      <ToggleButton value="thumbnails" aria-label="large thumbnails">
-        <GridView alt="View as Thumbnails" />
-      </ToggleButton>
+      <Tooltip title="Thumbnails">
+        <ToggleButton value="thumbnails" aria-label="large thumbnails">
+          <GridView alt="View as Thumbnails" />
+        </ToggleButton>
+      </Tooltip>
     </ToggleButtonGroup>
   )
 }

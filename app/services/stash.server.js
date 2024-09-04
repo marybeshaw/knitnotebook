@@ -2,10 +2,7 @@ import { getAxiosInstance } from "./axios.server"
 
 /**
  * List the entire user's stash with pagination
- *
- *
- */
-/**
+ * Will either search or list, depending on params
  *
  * @param {string} accessToken - The user's oath access token we add to our API request
  * @param {string} username - The user's signed-in username
@@ -34,7 +31,7 @@ export async function getStash({
     params.query = searchText
   }
 
-  // const requestURL = console.log(
+  // console.log(
   //   "request url:",
   //   getStashURL(username, searchText) + new URLSearchParams(params),
   // )
@@ -83,7 +80,6 @@ async function addFullStashInfo({ axiosInstance, username, stash }) {
   const response = await axiosInstance.get(
     `https://api.ravelry.com/people/${username}/stash/${stashId}.json`,
   )
-  console.log("stash data", response.data.stash)
 
   return response.data.stash
 }

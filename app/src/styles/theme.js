@@ -145,4 +145,25 @@ theme = createTheme(theme, {
   },
 })
 
+theme = createTheme(theme, {
+  components: {
+    // Name of the component
+    MuiChip: {
+      styleOverrides: {
+        // Name of the slot
+        root: {
+          fontSize: "18px",
+          margin: "2px",
+        },
+        label: {
+          margin: "3px 10px",
+        },
+        outlined: {
+          // fontSize: "18px",
+        },
+      },
+    },
+  },
+})
+
 export default theme

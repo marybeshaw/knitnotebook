@@ -5,9 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="71b13bb3-4d89-4637-80b2-e06918e4ccb1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/~$UtahJS 2024 - Complex State in React.pptx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UtahJS 2024 - Complex State in React.pptx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/stash.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/stash.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/~$UtahJS 2024 - Complex State in React.pptx" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +59,8 @@
       <updated>1724784693859</updated>
       <workItem from="1724784694908" duration="1307000" />
       <workItem from="1725133986336" duration="693000" />
-      <workItem from="1725145969849" duration="4474000" />
+      <workItem from="1725145969849" duration="6283000" />
+      <workItem from="1725387083772" duration="1000" />
     </task>
     <servers />
   </component>

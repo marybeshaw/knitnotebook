@@ -6,9 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="71b13bb3-4d89-4637-80b2-e06918e4ccb1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UtahJS 2024 - Complex State in React.pptx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/stash.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/stash.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/~$UtahJS 2024 - Complex State in React.pptx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/favorites.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/favorites.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,7 +36,7 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;demoState&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/marybeshaw/dev/knitnotebook&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -61,6 +59,9 @@
       <workItem from="1725133986336" duration="693000" />
       <workItem from="1725145969849" duration="6283000" />
       <workItem from="1725387083772" duration="1000" />
+      <workItem from="1726029955645" duration="606000" />
+      <workItem from="1726071069450" duration="1352000" />
+      <workItem from="1726087661432" duration="53000" />
     </task>
     <servers />
   </component>

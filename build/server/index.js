@@ -1,7 +1,7 @@
 import { jsx, jsxs } from "react/jsx-runtime";
 import * as ReactDOMServer from "react-dom/server";
 import { RemixServer, Meta, Links, ScrollRestoration, Scripts, useLoaderData, Outlet, json, useRouteError, isRouteErrorResponse, useSearchParams, useSubmit, Form, useFetcher } from "@remix-run/react";
-import { createTheme, ThemeProvider, CssBaseline, Typography, Link as Link$1, AppBar, Container, Toolbar, Box, IconButton, Menu as Menu$1, MenuItem, Tooltip, Avatar, unstable_useEnhancedEffect, Card, CardMedia, CardContent, CardActions, Chip, Paper, ToggleButtonGroup, ToggleButton, FormControl, InputLabel, OutlinedInput, InputAdornment, Select, Unstable_Grid2, Button, Pagination } from "@mui/material";
+import { createTheme, ThemeProvider, CssBaseline, Typography, Link as Link$1, AppBar, Container, Toolbar, Box, IconButton, Menu as Menu$1, MenuItem, Tooltip, Avatar, unstable_useEnhancedEffect, Card, CardMedia, CardContent, CardActions, Chip, Paper, Button, FormControl, InputLabel, OutlinedInput, InputAdornment, ToggleButtonGroup, ToggleButton, Unstable_Grid2, Select, Pagination } from "@mui/material";
 import { CacheProvider, withEmotionCache } from "@emotion/react";
 import createEmotionServer from "@emotion/server/create-instance";
 import * as React from "react";
@@ -14,7 +14,7 @@ import { OAuth2Strategy } from "remix-auth-oauth2";
 import axios from "axios";
 import { createCookieSessionStorage } from "@remix-run/node";
 import { css } from "@emotion/css";
-import { Workspaces, BrandingWatermark, Store, Psychology, Forum, Backpack, Gesture, BorderColor, ImportContacts, ViewList, GridView, Search, ImportExport } from "@mui/icons-material";
+import { Workspaces, BrandingWatermark, Store, Psychology, Forum, Backpack, Gesture, BorderColor, ImportContacts, Search, ViewList, GridView, ImportExport } from "@mui/icons-material";
 import { useDebouncedCallback } from "use-debounce";
 import { useSensors, useSensor, PointerSensor, KeyboardSensor, DndContext, closestCenter, DragOverlay } from "@dnd-kit/core";
 import { useSortable, sortableKeyboardCoordinates, SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
@@ -1099,23 +1099,38 @@ function FavoritesResults({ favoritesResults }) {
     }
   ) });
 }
-function DisplayPrefsOptions() {
-  const { displayPrefs, setResultsStyle } = useDisplayPrefs();
-  return /* @__PURE__ */ jsxs(
-    ToggleButtonGroup,
-    {
-      value: displayPrefs.resultsStyle,
-      exclusive: true,
-      onChange: (event, newAlignment) => {
-        setResultsStyle(newAlignment);
+const noResultsCss = css`
+  margin: 20px 20px 40px 10px;
+`;
+function NoResults({ searchText, dataType = "stash" }) {
+  const [, setSearchParams] = useSearchParams();
+  function handleClick() {
+    setSearchParams(
+      (params) => {
+        params.delete("searchText");
+        return params;
       },
-      "aria-label": "results display preferences",
-      children: [
-        /* @__PURE__ */ jsx(Tooltip, { title: "Display Preferences", children: /* @__PURE__ */ jsx(ToggleButton, { value: "list", "aria-label": "list with images", children: /* @__PURE__ */ jsx(ViewList, { alt: "View as List" }) }) }),
-        /* @__PURE__ */ jsx(Tooltip, { title: "Thumbnails", children: /* @__PURE__ */ jsx(ToggleButton, { value: "thumbnails", "aria-label": "large thumbnails", children: /* @__PURE__ */ jsx(GridView, { alt: "View as Thumbnails" }) }) })
-      ]
-    }
-  );
+      { replace: false }
+      // this causes navigation to the url with this  value in the path
+    );
+  }
+  return /* @__PURE__ */ jsx("div", { className: noResultsCss, children: searchText ? /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsxs(Typography, { variant: "body2", sx: { marginBottom: 2 }, children: [
+      dataType === "favorites" ? "No favorites match" : "No stash yarn matches",
+      " ",
+      "your search term, ",
+      searchText,
+      "."
+    ] }),
+    /* @__PURE__ */ jsxs(Button, { onClick: handleClick, variant: "contained", children: [
+      "See your entire",
+      " ",
+      dataType === "favorites" ? "favorites list" : "stash"
+    ] })
+  ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsx(Typography, { variant: "h2", children: "No stash yarn found." }),
+    /* @__PURE__ */ jsx(Typography, { variant: "body2", children: "You are missing out on something awesome!" })
+  ] }) });
 }
 function SearchInput({ searchText }) {
   const [, setSearchParams] = useSearchParams();
@@ -1150,190 +1165,20 @@ function SearchInput({ searchText }) {
     )
   ] }) });
 }
-const stashSort = {
-  recent: "Date Added",
-  alpha: "A to Z",
-  weight: "Weight",
-  colorfamily: "Color",
-  _yards: "Most Yardage"
-};
-function SortOrder({ dataType = "stash", sortOrder }) {
-  const [, setSearchParams] = useSearchParams();
-  const sortOptions = stashSort;
-  function onChangeSortOrder(e) {
-    setSearchParams(
-      (params) => {
-        params.set("sortOrder", e.target.value);
-        return params;
-      },
-      { replace: false }
-      // this causes navigation to the url with this  value in the path
-    );
-  }
-  return /* @__PURE__ */ jsx(Box, { sx: { marginRight: "10px" }, children: /* @__PURE__ */ jsxs(FormControl, { fullWidth: true, children: [
-    /* @__PURE__ */ jsx(InputLabel, { id: "sort-by-label", children: "Sort By:" }),
-    /* @__PURE__ */ jsx(
-      Select,
-      {
-        labelId: "sort-by-label",
-        id: "sort-by-select",
-        value: sortOrder,
-        label: "Sort By",
-        autoWidth: false,
-        defaultValue: sortOrder,
-        onChange: onChangeSortOrder,
-        children: Object.keys(sortOptions).map((sortOptionKey) => {
-          return /* @__PURE__ */ jsx(MenuItem, { value: sortOptionKey, children: sortOptions[sortOptionKey] }, sortOptionKey);
-        })
-      }
-    )
-  ] }) });
-}
-function HeaderRow({
-  searchText,
-  sortOrder,
-  dataType = "stash",
-  children
-}) {
+function DisplayPrefsOptions() {
+  const { displayPrefs, setResultsStyle } = useDisplayPrefs();
   return /* @__PURE__ */ jsxs(
-    Unstable_Grid2,
+    ToggleButtonGroup,
     {
-      container: true,
-      spacing: 3,
-      columnSpacing: { xs: 1, sm: 2, md: 3 },
-      disableEqualOverflow: true,
-      sx: { marginBottom: "10px" },
+      value: displayPrefs.resultsStyle,
+      exclusive: true,
+      onChange: (event, newAlignment) => {
+        setResultsStyle(newAlignment);
+      },
+      "aria-label": "results display preferences",
       children: [
-        /* @__PURE__ */ jsx(
-          Unstable_Grid2,
-          {
-            xs: 12,
-            sm: dataType === "favorites" ? 12 : 6,
-            md: dataType === "favorites" ? 3 : 4,
-            children: /* @__PURE__ */ jsx(Typography, { variant: "h1", component: "h1", sx: { padding: "10px" }, children })
-          }
-        ),
-        dataType === "favorites" && /* @__PURE__ */ jsx(
-          Unstable_Grid2,
-          {
-            xs: 12,
-            sm: 6,
-            md: 5,
-            sx: { alignSelf: "center", textAlign: "right" },
-            children: /* @__PURE__ */ jsx(FavoriteTypeChips, {})
-          }
-        ),
-        /* @__PURE__ */ jsxs(
-          Unstable_Grid2,
-          {
-            xs: 12,
-            sm: 6,
-            md: dataType === "favorites" ? 4 : 6,
-            display: "flex",
-            justifyContent: "right",
-            alignItems: "right",
-            children: [
-              /* @__PURE__ */ jsx(SearchInput, { searchText }),
-              dataType === "stash" && /* @__PURE__ */ jsx(SortOrder, { sortOrder }),
-              /* @__PURE__ */ jsx(DisplayPrefsOptions, {})
-            ]
-          }
-        )
-      ]
-    }
-  );
-}
-const noResultsCss = css`
-  margin: 20px 20px 40px 10px;
-`;
-function NoResults({ searchText, dataType = "stash" }) {
-  const [, setSearchParams] = useSearchParams();
-  function handleClick() {
-    setSearchParams(
-      (params) => {
-        params.delete("searchText");
-        return params;
-      },
-      { replace: false }
-      // this causes navigation to the url with this  value in the path
-    );
-  }
-  return /* @__PURE__ */ jsx("div", { className: noResultsCss, children: searchText ? /* @__PURE__ */ jsxs(Fragment, { children: [
-    /* @__PURE__ */ jsxs(Typography, { variant: "body2", sx: { marginBottom: 2 }, children: [
-      dataType === "favorites" ? "No favorites match" : "No stash yarn matches",
-      " ",
-      "your search term, ",
-      searchText,
-      "."
-    ] }),
-    /* @__PURE__ */ jsxs(Button, { onClick: handleClick, variant: "contained", children: [
-      "See your entire",
-      " ",
-      dataType === "favorites" ? "favorites list" : "stash"
-    ] })
-  ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
-    /* @__PURE__ */ jsx(Typography, { variant: "h2", children: "No stash yarn found." }),
-    /* @__PURE__ */ jsx(Typography, { variant: "body2", children: "You are missing out on something awesome!" })
-  ] }) });
-}
-const pageSizeOptions = [10, 20, 50];
-function Paginator({ pageSize, currentPage, numPages }) {
-  const [, setSearchParams] = useSearchParams();
-  function onChangePageNum(e, value) {
-    setSearchParams(
-      (params) => {
-        params.set("currentPage", value);
-        return params;
-      },
-      { replace: false }
-      // this causes navigation to the url with this  value in the path
-    );
-  }
-  function onChangePageSize(e) {
-    setSearchParams(
-      (params) => {
-        const pageSize2 = e.target.value;
-        const startNumberGoal = params.get("pageSize") * (params.get("currentPage") - 1);
-        params.set("pageSize", pageSize2);
-        params.set("currentPage", Math.floor(startNumberGoal / pageSize2 + 1));
-        return params;
-      },
-      { replace: false }
-      // this causes navigation to the url with this  value in the path
-    );
-  }
-  return /* @__PURE__ */ jsxs(
-    Box,
-    {
-      display: "flex",
-      justifyContent: "space-between",
-      sx: { marginRight: "-4px" },
-      children: [
-        /* @__PURE__ */ jsx(Box, { sx: { minWidth: 120 }, children: /* @__PURE__ */ jsxs(FormControl, { fullWidth: true, size: "small", children: [
-          /* @__PURE__ */ jsx(InputLabel, { id: "page-size-label", children: "Page Size" }),
-          /* @__PURE__ */ jsx(
-            Select,
-            {
-              labelId: "page-size-label",
-              id: "page-size",
-              value: pageSize,
-              label: "Page Size",
-              onChange: onChangePageSize,
-              children: pageSizeOptions.map((pageSizeOption) => /* @__PURE__ */ jsx(MenuItem, { value: pageSizeOption, children: pageSizeOption }, pageSizeOption))
-            }
-          )
-        ] }) }),
-        /* @__PURE__ */ jsx(
-          Pagination,
-          {
-            count: numPages,
-            variant: "outlined",
-            shape: "rounded",
-            size: "large",
-            page: +currentPage,
-            onChange: onChangePageNum
-          }
-        )
+        /* @__PURE__ */ jsx(Tooltip, { title: "Display Preferences", children: /* @__PURE__ */ jsx(ToggleButton, { value: "list", "aria-label": "list with images", children: /* @__PURE__ */ jsx(ViewList, { alt: "View as List" }) }) }),
+        /* @__PURE__ */ jsx(Tooltip, { title: "Thumbnails", children: /* @__PURE__ */ jsx(ToggleButton, { value: "thumbnails", "aria-label": "large thumbnails", children: /* @__PURE__ */ jsx(GridView, { alt: "View as Thumbnails" }) }) })
       ]
     }
   );
@@ -1341,6 +1186,7 @@ function Paginator({ pageSize, currentPage, numPages }) {
 const DEFAULT_PAGE_SIZE$1 = 10;
 const DEFAULT_CURRENT_PAGE$1 = 1;
 const DEFAULT_SORT_ORDER$1 = "recent";
+const pageSizeOptions$1 = [10, 20, 50];
 const loader$3 = async ({ request }) => {
   let { user, tokens } = await authenticator.isAuthenticated(request, {
     failureRedirect: "/"
@@ -1372,17 +1218,113 @@ const loader$3 = async ({ request }) => {
 function Favorites() {
   var _a;
   const { favorites, data, pageProps } = useLoaderData();
+  const [, setSearchParams] = useSearchParams();
+  function onChangePageNum(e, value) {
+    setSearchParams(
+      (params) => {
+        params.set("currentPage", value);
+        return params;
+      },
+      { replace: false }
+      // this causes navigation to the url with this  value in the path
+    );
+  }
+  function onChangePageSize(e) {
+    setSearchParams(
+      (params) => {
+        const pageSize = e.target.value;
+        const startNumberGoal = params.get("pageSize") * (params.get("currentPage") - 1);
+        params.set("pageSize", pageSize);
+        params.set("currentPage", Math.floor(startNumberGoal / pageSize + 1));
+        return params;
+      },
+      { replace: false }
+      // this causes navigation to the url with this  value in the path
+    );
+  }
   const numPages = ((_a = data == null ? void 0 : data.paginator) == null ? void 0 : _a.last_page) || 1;
   return /* @__PURE__ */ jsxs(DisplayPrefsProvider, { children: [
-    /* @__PURE__ */ jsx(HeaderRow, { dataType: "favorites", ...pageProps, children: "My Favorites" }),
+    /* @__PURE__ */ jsxs(
+      Unstable_Grid2,
+      {
+        container: true,
+        spacing: 3,
+        columnSpacing: { xs: 1, sm: 2, md: 3 },
+        disableEqualOverflow: true,
+        sx: { marginBottom: "10px" },
+        children: [
+          /* @__PURE__ */ jsx(
+            Unstable_Grid2,
+            {
+              xs: 12,
+              sm: 12,
+              md: 3,
+              children: /* @__PURE__ */ jsx(Typography, { variant: "h1", component: "h1", sx: { padding: "10px" }, children: "My Favorites" })
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            Unstable_Grid2,
+            {
+              xs: 12,
+              sm: 6,
+              md: 5,
+              sx: { alignSelf: "center", textAlign: "right" },
+              children: /* @__PURE__ */ jsx(FavoriteTypeChips, {})
+            }
+          ),
+          /* @__PURE__ */ jsxs(
+            Unstable_Grid2,
+            {
+              xs: 12,
+              sm: 6,
+              md: 4,
+              display: "flex",
+              justifyContent: "right",
+              alignItems: "right",
+              children: [
+                /* @__PURE__ */ jsx(SearchInput, { searchText: pageProps.searchText }),
+                /* @__PURE__ */ jsx(DisplayPrefsOptions, {})
+              ]
+            }
+          )
+        ]
+      }
+    ),
     favorites.length ? /* @__PURE__ */ jsxs(Fragment, { children: [
       /* @__PURE__ */ jsx(FavoritesResults, { favoritesResults: favorites }),
-      /* @__PURE__ */ jsx(
-        Paginator,
+      /* @__PURE__ */ jsxs(
+        Box,
         {
-          pageSize: pageProps.pageSize,
-          currentPage: pageProps.currentPage,
-          numPages
+          display: "flex",
+          justifyContent: "space-between",
+          sx: { marginRight: "-4px" },
+          children: [
+            /* @__PURE__ */ jsx(Box, { sx: { minWidth: 120 }, children: /* @__PURE__ */ jsxs(FormControl, { fullWidth: true, size: "small", children: [
+              /* @__PURE__ */ jsx(InputLabel, { id: "page-size-label", children: "Page Size" }),
+              /* @__PURE__ */ jsx(
+                Select,
+                {
+                  labelId: "page-size-label",
+                  id: "page-size",
+                  value: pageProps.pageSize,
+                  label: "Page Size",
+                  onChange: onChangePageSize,
+                  children: pageSizeOptions$1.map((pageSizeOption) => /* @__PURE__ */ jsx(MenuItem, { value: pageSizeOption, children: pageSizeOption }, pageSizeOption))
+                }
+              )
+            ] }) }),
+            /* @__PURE__ */ jsx(
+              Pagination,
+              {
+                count: numPages,
+                variant: "outlined",
+                shape: "rounded",
+                size: "large",
+                page: +pageProps.currentPage,
+                onChange: onChangePageNum
+              }
+            )
+          ]
         }
       )
     ] }) : /* @__PURE__ */ jsx(NoResults, { searchText: pageProps.searchText, dataType: "favorites" }),
@@ -1789,6 +1731,161 @@ function getStashURL(username, searchText) {
   }
   return `https://api.ravelry.com/people/${username}/stash/list.json?`;
 }
+const stashSort = {
+  recent: "Date Added",
+  alpha: "A to Z",
+  weight: "Weight",
+  colorfamily: "Color",
+  _yards: "Most Yardage"
+};
+function SortOrder({ dataType = "stash", sortOrder }) {
+  const [, setSearchParams] = useSearchParams();
+  const sortOptions = stashSort;
+  function onChangeSortOrder(e) {
+    setSearchParams(
+      (params) => {
+        params.set("sortOrder", e.target.value);
+        return params;
+      },
+      { replace: false }
+      // this causes navigation to the url with this  value in the path
+    );
+  }
+  return /* @__PURE__ */ jsx(Box, { sx: { marginRight: "10px" }, children: /* @__PURE__ */ jsxs(FormControl, { fullWidth: true, children: [
+    /* @__PURE__ */ jsx(InputLabel, { id: "sort-by-label", children: "Sort By:" }),
+    /* @__PURE__ */ jsx(
+      Select,
+      {
+        labelId: "sort-by-label",
+        id: "sort-by-select",
+        value: sortOrder,
+        label: "Sort By",
+        autoWidth: false,
+        defaultValue: sortOrder,
+        onChange: onChangeSortOrder,
+        children: Object.keys(sortOptions).map((sortOptionKey) => {
+          return /* @__PURE__ */ jsx(MenuItem, { value: sortOptionKey, children: sortOptions[sortOptionKey] }, sortOptionKey);
+        })
+      }
+    )
+  ] }) });
+}
+function HeaderRow({
+  searchText,
+  sortOrder,
+  dataType = "stash",
+  children
+}) {
+  return /* @__PURE__ */ jsxs(
+    Unstable_Grid2,
+    {
+      container: true,
+      spacing: 3,
+      columnSpacing: { xs: 1, sm: 2, md: 3 },
+      disableEqualOverflow: true,
+      sx: { marginBottom: "10px" },
+      children: [
+        /* @__PURE__ */ jsx(
+          Unstable_Grid2,
+          {
+            xs: 12,
+            sm: dataType === "favorites" ? 12 : 6,
+            md: dataType === "favorites" ? 3 : 4,
+            children: /* @__PURE__ */ jsx(Typography, { variant: "h1", component: "h1", sx: { padding: "10px" }, children })
+          }
+        ),
+        dataType === "favorites" && /* @__PURE__ */ jsx(
+          Unstable_Grid2,
+          {
+            xs: 12,
+            sm: 6,
+            md: 5,
+            sx: { alignSelf: "center", textAlign: "right" },
+            children: /* @__PURE__ */ jsx(FavoriteTypeChips, {})
+          }
+        ),
+        /* @__PURE__ */ jsxs(
+          Unstable_Grid2,
+          {
+            xs: 12,
+            sm: 6,
+            md: dataType === "favorites" ? 4 : 6,
+            display: "flex",
+            justifyContent: "right",
+            alignItems: "right",
+            children: [
+              /* @__PURE__ */ jsx(SearchInput, { searchText }),
+              dataType === "stash" && /* @__PURE__ */ jsx(SortOrder, { sortOrder }),
+              /* @__PURE__ */ jsx(DisplayPrefsOptions, {})
+            ]
+          }
+        )
+      ]
+    }
+  );
+}
+const pageSizeOptions = [10, 20, 50];
+function Paginator({ pageSize, currentPage, numPages }) {
+  const [, setSearchParams] = useSearchParams();
+  function onChangePageNum(e, value) {
+    setSearchParams(
+      (params) => {
+        params.set("currentPage", value);
+        return params;
+      },
+      { replace: false }
+      // this causes navigation to the url with this  value in the path
+    );
+  }
+  function onChangePageSize(e) {
+    setSearchParams(
+      (params) => {
+        const pageSize2 = e.target.value;
+        const startNumberGoal = params.get("pageSize") * (params.get("currentPage") - 1);
+        params.set("pageSize", pageSize2);
+        params.set("currentPage", Math.floor(startNumberGoal / pageSize2 + 1));
+        return params;
+      },
+      { replace: false }
+      // this causes navigation to the url with this  value in the path
+    );
+  }
+  return /* @__PURE__ */ jsxs(
+    Box,
+    {
+      display: "flex",
+      justifyContent: "space-between",
+      sx: { marginRight: "-4px" },
+      children: [
+        /* @__PURE__ */ jsx(Box, { sx: { minWidth: 120 }, children: /* @__PURE__ */ jsxs(FormControl, { fullWidth: true, size: "small", children: [
+          /* @__PURE__ */ jsx(InputLabel, { id: "page-size-label", children: "Page Size" }),
+          /* @__PURE__ */ jsx(
+            Select,
+            {
+              labelId: "page-size-label",
+              id: "page-size",
+              value: pageSize,
+              label: "Page Size",
+              onChange: onChangePageSize,
+              children: pageSizeOptions.map((pageSizeOption) => /* @__PURE__ */ jsx(MenuItem, { value: pageSizeOption, children: pageSizeOption }, pageSizeOption))
+            }
+          )
+        ] }) }),
+        /* @__PURE__ */ jsx(
+          Pagination,
+          {
+            count: numPages,
+            variant: "outlined",
+            shape: "rounded",
+            size: "large",
+            page: +currentPage,
+            onChange: onChangePageNum
+          }
+        )
+      ]
+    }
+  );
+}
 function StashDetails({ stash, type = "list" }) {
   var _a;
   const totalYardage = getTotalYardage(stash == null ? void 0 : stash.packs);
@@ -1998,7 +2095,7 @@ const route11 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePrope
   default: Stash,
   loader
 }, Symbol.toStringTag, { value: "Module" }));
-const serverManifest = { "entry": { "module": "/assets/entry.client-CA1sEkyv.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/useTheme-5sFMoId9.js", "/assets/index-DOTPFuaT.js", "/assets/theme-V3xXse2h.js", "/assets/index-COTo03wr.js", "/assets/GlobalStyles-DQzmn2_Z.js", "/assets/components-BuGUhU6K.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-BBjZ8L9f.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/useTheme-5sFMoId9.js", "/assets/index-DOTPFuaT.js", "/assets/theme-V3xXse2h.js", "/assets/index-COTo03wr.js", "/assets/GlobalStyles-DQzmn2_Z.js", "/assets/components-BuGUhU6K.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/Typography-wcXED6J0.js", "/assets/useIsFocusVisible-CPlKmROo.js", "/assets/Link-BYYak0VS.js", "/assets/ButtonBase-KljXaplS.js", "/assets/Paper-d-ALm8uW.js", "/assets/Link-S1ptO2_9.js", "/assets/UserProvider-DZWmR8mT.js", "/assets/Tooltip-BKiMUKxq.js", "/assets/createSvgIcon-DhpipJwV.js"], "css": [] }, "routes/auth.ravelry.callback": { "id": "routes/auth.ravelry.callback", "parentId": "routes/auth.ravelry", "path": "callback", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry.callback-DqMyK8dA.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/index-DOTPFuaT.js", "/assets/components-BuGUhU6K.js"], "css": [] }, "routes/auth.ravelry": { "id": "routes/auth.ravelry", "parentId": "root", "path": "auth/ravelry", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/login-failed": { "id": "routes/login-failed", "parentId": "root", "path": "login-failed", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/login-failed-TM3j_Pv9.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js"], "css": [] }, "routes/dashboard": { "id": "routes/dashboard", "parentId": "root", "path": "dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/dashboard-BvlxvUEs.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/Typography-wcXED6J0.js", "/assets/useIsFocusVisible-CPlKmROo.js", "/assets/index-DOTPFuaT.js", "/assets/Link-BYYak0VS.js", "/assets/useTheme-5sFMoId9.js", "/assets/Paper-d-ALm8uW.js", "/assets/emotion-css.development.esm-CNBYDLmo.js", "/assets/Link-S1ptO2_9.js", "/assets/CardMedia-3qf8g595.js"], "css": [] }, "routes/favorites": { "id": "routes/favorites", "parentId": "root", "path": "favorites", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/favorites-W_RLkSTt.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/Typography-wcXED6J0.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/useIsFocusVisible-CPlKmROo.js", "/assets/useTheme-5sFMoId9.js", "/assets/index-COTo03wr.js", "/assets/ButtonBase-KljXaplS.js", "/assets/Paper-d-ALm8uW.js", "/assets/index-DOTPFuaT.js", "/assets/emotion-css.development.esm-CNBYDLmo.js", "/assets/createSvgIcon-DhpipJwV.js", "/assets/Tooltip-BKiMUKxq.js", "/assets/Button-fn9KT81s.js", "/assets/GlobalStyles-DQzmn2_Z.js", "/assets/Paginator-BlDmNtSt.js", "/assets/Link-BYYak0VS.js", "/assets/CardMedia-3qf8g595.js", "/assets/components-BuGUhU6K.js"], "css": [] }, "routes/sign-out": { "id": "routes/sign-out", "parentId": "root", "path": "sign-out", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sign-out-D_eFM_CV.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/index-DOTPFuaT.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/Typography-wcXED6J0.js", "/assets/useIsFocusVisible-CPlKmROo.js", "/assets/ButtonBase-KljXaplS.js", "/assets/UserProvider-DZWmR8mT.js", "/assets/components-BuGUhU6K.js", "/assets/Button-fn9KT81s.js"], "css": [] }, "routes/profile": { "id": "routes/profile", "parentId": "root", "path": "profile", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/profile-5wJldYQz.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/index-DOTPFuaT.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/components-BuGUhU6K.js", "/assets/Typography-wcXED6J0.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-ByWz2VYz.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/Typography-wcXED6J0.js", "/assets/useIsFocusVisible-CPlKmROo.js", "/assets/index-DOTPFuaT.js", "/assets/Link-BYYak0VS.js", "/assets/Link-S1ptO2_9.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-C0TPkh4L.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/Typography-wcXED6J0.js", "/assets/useIsFocusVisible-CPlKmROo.js", "/assets/index-DOTPFuaT.js", "/assets/Link-BYYak0VS.js", "/assets/Link-S1ptO2_9.js"], "css": [] }, "routes/queue": { "id": "routes/queue", "parentId": "root", "path": "queue", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/queue-sXyAK95V.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/Typography-wcXED6J0.js", "/assets/useTheme-5sFMoId9.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/index-DOTPFuaT.js", "/assets/emotion-css.development.esm-CNBYDLmo.js", "/assets/Paper-d-ALm8uW.js", "/assets/createSvgIcon-DhpipJwV.js", "/assets/components-BuGUhU6K.js"], "css": [] }, "routes/stash": { "id": "routes/stash", "parentId": "root", "path": "stash", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/stash-CAytomGB.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/Typography-wcXED6J0.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/useIsFocusVisible-CPlKmROo.js", "/assets/useTheme-5sFMoId9.js", "/assets/index-COTo03wr.js", "/assets/ButtonBase-KljXaplS.js", "/assets/Paper-d-ALm8uW.js", "/assets/index-DOTPFuaT.js", "/assets/emotion-css.development.esm-CNBYDLmo.js", "/assets/createSvgIcon-DhpipJwV.js", "/assets/Tooltip-BKiMUKxq.js", "/assets/Button-fn9KT81s.js", "/assets/GlobalStyles-DQzmn2_Z.js", "/assets/Paginator-BlDmNtSt.js", "/assets/components-BuGUhU6K.js"], "css": [] } }, "url": "/assets/manifest-1a5a05ca.js", "version": "1a5a05ca" };
+const serverManifest = { "entry": { "module": "/assets/entry.client-CHupLyvd.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/useTheme-5sFMoId9.js", "/assets/index-quUFlI7y.js", "/assets/theme-V3xXse2h.js", "/assets/index-COTo03wr.js", "/assets/GlobalStyles-DQzmn2_Z.js", "/assets/components-CUuv5FDo.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": true, "module": "/assets/root-Bc3sdJh-.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/useTheme-5sFMoId9.js", "/assets/index-quUFlI7y.js", "/assets/theme-V3xXse2h.js", "/assets/index-COTo03wr.js", "/assets/GlobalStyles-DQzmn2_Z.js", "/assets/components-CUuv5FDo.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/Typography-wcXED6J0.js", "/assets/useIsFocusVisible-CPlKmROo.js", "/assets/Link-BYYak0VS.js", "/assets/ButtonBase-KljXaplS.js", "/assets/Paper-d-ALm8uW.js", "/assets/Link-Dozo4ZR9.js", "/assets/UserProvider-DZWmR8mT.js", "/assets/Tooltip-zq-lYHWG.js", "/assets/createSvgIcon-DhpipJwV.js"], "css": [] }, "routes/auth.ravelry.callback": { "id": "routes/auth.ravelry.callback", "parentId": "routes/auth.ravelry", "path": "callback", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry.callback-dyHm6j3C.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/index-quUFlI7y.js", "/assets/components-CUuv5FDo.js"], "css": [] }, "routes/auth.ravelry": { "id": "routes/auth.ravelry", "parentId": "root", "path": "auth/ravelry", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/auth.ravelry-l0sNRNKZ.js", "imports": [], "css": [] }, "routes/login-failed": { "id": "routes/login-failed", "parentId": "root", "path": "login-failed", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/login-failed-TM3j_Pv9.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js"], "css": [] }, "routes/dashboard": { "id": "routes/dashboard", "parentId": "root", "path": "dashboard", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/dashboard-C-R_odWp.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/Typography-wcXED6J0.js", "/assets/useIsFocusVisible-CPlKmROo.js", "/assets/index-quUFlI7y.js", "/assets/Link-BYYak0VS.js", "/assets/useTheme-5sFMoId9.js", "/assets/Paper-d-ALm8uW.js", "/assets/emotion-css.development.esm-CNBYDLmo.js", "/assets/Link-Dozo4ZR9.js", "/assets/CardMedia-3qf8g595.js"], "css": [] }, "routes/favorites": { "id": "routes/favorites", "parentId": "root", "path": "favorites", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/favorites-CaMxK_nY.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/Typography-wcXED6J0.js", "/assets/useIsFocusVisible-CPlKmROo.js", "/assets/useTheme-5sFMoId9.js", "/assets/index-COTo03wr.js", "/assets/ButtonBase-KljXaplS.js", "/assets/Paper-d-ALm8uW.js", "/assets/index-quUFlI7y.js", "/assets/Tooltip-zq-lYHWG.js", "/assets/createSvgIcon-DhpipJwV.js", "/assets/emotion-css.development.esm-CNBYDLmo.js", "/assets/Button-fn9KT81s.js", "/assets/GlobalStyles-DQzmn2_Z.js", "/assets/DisplayPrefsOptions-WJMdYm0B.js", "/assets/Link-BYYak0VS.js", "/assets/CardMedia-3qf8g595.js", "/assets/components-CUuv5FDo.js"], "css": [] }, "routes/sign-out": { "id": "routes/sign-out", "parentId": "root", "path": "sign-out", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/sign-out-BtNVGwyJ.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/index-quUFlI7y.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/Typography-wcXED6J0.js", "/assets/useIsFocusVisible-CPlKmROo.js", "/assets/ButtonBase-KljXaplS.js", "/assets/UserProvider-DZWmR8mT.js", "/assets/components-CUuv5FDo.js", "/assets/Button-fn9KT81s.js"], "css": [] }, "routes/profile": { "id": "routes/profile", "parentId": "root", "path": "profile", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/profile-B-Muc2C9.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/index-quUFlI7y.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/components-CUuv5FDo.js", "/assets/Typography-wcXED6J0.js"], "css": [] }, "routes/_index": { "id": "routes/_index", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/_index-DvgKyeNM.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/Typography-wcXED6J0.js", "/assets/useIsFocusVisible-CPlKmROo.js", "/assets/index-quUFlI7y.js", "/assets/Link-BYYak0VS.js", "/assets/Link-Dozo4ZR9.js"], "css": [] }, "routes/about": { "id": "routes/about", "parentId": "root", "path": "about", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/about-DCbleHKB.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/Typography-wcXED6J0.js", "/assets/useIsFocusVisible-CPlKmROo.js", "/assets/index-quUFlI7y.js", "/assets/Link-BYYak0VS.js", "/assets/Link-Dozo4ZR9.js"], "css": [] }, "routes/queue": { "id": "routes/queue", "parentId": "root", "path": "queue", "index": void 0, "caseSensitive": void 0, "hasAction": true, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/queue-C8AA7aLk.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/Typography-wcXED6J0.js", "/assets/useTheme-5sFMoId9.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/index-quUFlI7y.js", "/assets/emotion-css.development.esm-CNBYDLmo.js", "/assets/Paper-d-ALm8uW.js", "/assets/createSvgIcon-DhpipJwV.js", "/assets/components-CUuv5FDo.js"], "css": [] }, "routes/stash": { "id": "routes/stash", "parentId": "root", "path": "stash", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasErrorBoundary": false, "module": "/assets/stash-DKnIre07.js", "imports": ["/assets/jsx-runtime-BJa62n0-.js", "/assets/DefaultPropsProvider-EXnQoTJj.js", "/assets/chainPropTypes-CPkqCYVL.js", "/assets/Typography-wcXED6J0.js", "/assets/useIsFocusVisible-CPlKmROo.js", "/assets/useTheme-5sFMoId9.js", "/assets/index-COTo03wr.js", "/assets/ButtonBase-KljXaplS.js", "/assets/Paper-d-ALm8uW.js", "/assets/index-quUFlI7y.js", "/assets/Tooltip-zq-lYHWG.js", "/assets/createSvgIcon-DhpipJwV.js", "/assets/emotion-css.development.esm-CNBYDLmo.js", "/assets/Button-fn9KT81s.js", "/assets/GlobalStyles-DQzmn2_Z.js", "/assets/DisplayPrefsOptions-WJMdYm0B.js", "/assets/components-CUuv5FDo.js"], "css": [] } }, "url": "/assets/manifest-86e770d8.js", "version": "86e770d8" };
 const mode = "production";
 const assetsBuildDirectory = "build/client";
 const basename = "/";

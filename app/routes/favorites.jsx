@@ -1,20 +1,35 @@
-import { Typography } from "@mui/material"
-import { json, useLoaderData } from "@remix-run/react"
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Pagination,
+  Select,
+  Typography,
+  Unstable_Grid2 as Grid
+} from "@mui/material"
+import { json, useLoaderData, useSearchParams } from "@remix-run/react"
 import { Fragment } from "react"
 
 import { authenticator } from "../services/auth.server"
 import { getFavorites } from "../services/favorites.server"
 
-import { allFavoriteTypes } from "../src/favorites/FavoriteTypeChips"
+import FavoriteTypeChips, { allFavoriteTypes } from "../src/favorites/FavoriteTypeChips"
 import FavoritesResults from "../src/favorites/FavoritesResults"
 import DisplayPrefsProvider from "../src/results/DisplayPrefsProvider"
-import HeaderRow from "../src/results/HeaderRow"
+// import HeaderRow from "../src/results/HeaderRow"
 import NoResults from "../src/results/NoResults"
-import Paginator from "../src/results/Paginator"
+import SearchInput from "../src/results/SearchInput.jsx"
+import DisplayPrefOptions from "../src/results/DisplayPrefsOptions.jsx"
+// import Paginator from "../src/results/Paginator"
 
 const DEFAULT_PAGE_SIZE = 10
 const DEFAULT_CURRENT_PAGE = 1
 const DEFAULT_SORT_ORDER = "recent" // Should be one of: recent, alpha, weight, colorfamily, yards. Defaults to "alpha".
+
+// modify this array to change our available options.
+// To make it fully configurable, use a component prop and just make this default
+const pageSizeOptions = [10, 20, 50]
 
 export const loader = async ({ request }) => {
   let { user, tokens } = await authenticator.isAuthenticated(request, {
@@ -53,6 +68,36 @@ export const loader = async ({ request }) => {
 
 export default function Favorites() {
   const { favorites, data, pageProps } = useLoaderData()
+  const [, setSearchParams] = useSearchParams()
+
+  // new page # is in the second param, value
+  function onChangePageNum(e, value) {
+    setSearchParams(
+      (params) => {
+        params.set("currentPage", value)
+        return params
+      },
+      { replace: false }, // this causes navigation to the url with this  value in the path
+    )
+  }
+
+  // new page size is in e.target.value
+  function onChangePageSize(e) {
+    setSearchParams(
+      (params) => {
+        const pageSize = e.target.value
+        const startNumberGoal =
+          params.get("pageSize") * (params.get("currentPage") - 1)
+
+        params.set("pageSize", pageSize)
+        // Stay at the same starting item (or keep the same starting  item on the page)
+        // when changing results per page by adjusting the current page number
+        params.set("currentPage", Math.floor(startNumberGoal / pageSize + 1))
+        return params
+      },
+      { replace: false }, // this causes navigation to the url with this  value in the path
+    )
+  }
 
   // Derived variable here!
   // It must change every time the # results or page size changes.
@@ -61,19 +106,84 @@ export default function Favorites() {
 
   return (
     <DisplayPrefsProvider>
-      <HeaderRow dataType="favorites" {...pageProps}>
-        My Favorites
-      </HeaderRow>
+      <Grid
+        container
+        spacing={3}
+        columnSpacing={{ xs: 1, sm: 2, md: 3 }}
+        disableEqualOverflow
+        sx={{ marginBottom: "10px" }}
+      >
+        <Grid
+          xs={12}
+          sm={12}
+          md={ 3 }
+        >
+          <Typography variant="h1" component="h1" sx={{ padding: "10px" }}>
+            My Favorites
+          </Typography>
+        </Grid>
+        {(
+          <Grid
+            xs={12}
+            sm={6}
+            md={5}
+            sx={{ alignSelf: "center", textAlign: "right" }}
+          >
+            <FavoriteTypeChips />
+          </Grid>
+        )}
+        <Grid
+          xs={12}
+          sm={6}
+          md={4}
+          display="flex"
+          justifyContent="right"
+          alignItems="right"
+        >
+          <SearchInput searchText={pageProps.searchText} />
+          <DisplayPrefOptions />
+        </Grid>
+      </Grid>
 
       {favorites.length ? (
         <Fragment>
           <FavoritesResults favoritesResults={favorites} />
 
-          <Paginator
-            pageSize={pageProps.pageSize}
-            currentPage={pageProps.currentPage}
-            numPages={numPages}
-          />
+          {/* Start Pagination */}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            sx={{ marginRight: "-4px" }}
+          >
+            <Box sx={{ minWidth: 120 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel id="page-size-label">Page Size</InputLabel>
+                <Select
+                  labelId="page-size-label"
+                  id="page-size"
+                  value={pageProps.pageSize}
+                  label="Page Size"
+                  onChange={onChangePageSize}
+                >
+                  {pageSizeOptions.map((pageSizeOption) => (
+                    <MenuItem key={pageSizeOption} value={pageSizeOption}>
+                      {pageSizeOption}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+            <Pagination
+              count={numPages}
+              variant="outlined"
+              shape="rounded"
+              size="large"
+              page={+pageProps.currentPage}
+              onChange={onChangePageNum}
+            />
+          </Box>
+          {/* End Pagination */}
+
         </Fragment>
       ) : (
         <NoResults searchText={pageProps.searchText} dataType="favorites" />

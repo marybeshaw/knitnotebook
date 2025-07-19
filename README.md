@@ -1,10 +1,15 @@
 # knitnotebook
-
 A tool to manage my knitting notebook on Ravelry.
 
-## Complex React State Presentation
+# Archiving This Repository 
+This project was a good learning tool, all about connecting with Ravelry and doing some state management. I am archiving it since I will not take the project further.
+
+Ravelry is a wonderful web site, and I wanted to be respectful of the rich community & database that exists on that site!  Go use that wonderful web site!   
+
+## September 2024 Complex React State Presentation
 
 [Download the Presentation Here](UtahJS%202024%20-%20Complex%20State%20in%20React.pptx)
+
 
 ## Complex React State Demo Project
 
